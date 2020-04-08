@@ -1,0 +1,51 @@
+Script started on 2020-04-07 18:56:58-0700
+[3J[H[2J[32mdawn@never:[36m~/.repos/csci347_s20[33m $ (B[mexitman 3 execgcc -Wall -o ush/ush ush/ush.c;./ush/ush
+% ls
+README.md  script-nq  ush
+% ls -l
+total 8
+-rw-r--r-- 1 dawn dawn   24 Apr  7 14:47 README.md
+-rw-r--r-- 1 dawn dawn    0 Apr  7 18:56 script-nq
+drwxr-xr-x 2 dawn dawn 4096 Apr  7 18:57 ush
+% ls -la
+total 20
+drwxr-xr-x 4 dawn dawn 4096 Apr  7 18:56 .
+drwxrwxr-x 5 dawn dawn 4096 Apr  7 14:44 ..
+drwxr-xr-x 8 dawn dawn 4096 Apr  7 14:55 .git
+-rw-r--r-- 1 dawn dawn   24 Apr  7 14:47 README.md
+-rw-r--r-- 1 dawn dawn    0 Apr  7 18:56 script-nq
+drwxr-xr-x 2 dawn dawn 4096 Apr  7 18:57 ush
+% ls -l -a
+total 20
+drwxr-xr-x 4 dawn dawn 4096 Apr  7 18:56 .
+drwxrwxr-x 5 dawn dawn 4096 Apr  7 14:44 ..
+drwxr-xr-x 8 dawn dawn 4096 Apr  7 14:55 .git
+-rw-r--r-- 1 dawn dawn   24 Apr  7 14:47 README.md
+-rw-r--r-- 1 dawn dawn    0 Apr  7 18:56 script-nq
+drwxr-xr-x 2 dawn dawn 4096 Apr  7 18:57 ush
+% ls           -l
+total 8
+-rw-r--r-- 1 dawn dawn   24 Apr  7 14:47 README.md
+-rw-r--r-- 1 dawn dawn    0 Apr  7 18:56 script-nq
+drwxr-xr-x 2 dawn dawn 4096 Apr  7 18:57 ush
+% ls -l       -a^[[D                -l            -a
+total 20
+drwxr-xr-x 4 dawn dawn 4096 Apr  7 18:56 .
+drwxrwxr-x 5 dawn dawn 4096 Apr  7 14:44 ..
+drwxr-xr-x 8 dawn dawn 4096 Apr  7 14:55 .git
+-rw-r--r-- 1 dawn dawn   24 Apr  7 14:47 README.md
+-rw-r--r-- 1 dawn dawn    0 Apr  7 18:56 script-nq
+drwxr-xr-x 2 dawn dawn 4096 Apr  7 18:57 ush
+% pwd
+/home/dawn/.repos/csci347_s20
+% pwd --version
+pwd (GNU coreutils) 8.28
+Copyright (C) 2017 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Jim Meyering.
+% [32mdawn@never:[36m~/.repos/csci347_s20[33m $ (B[mexit
+
+Script done on 2020-04-07 19:00:32-0700
