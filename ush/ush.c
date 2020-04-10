@@ -24,6 +24,8 @@
 
 void processline (char *line);
 char ** arg_parse (char *line, int *argcptr);
+int check_for_quotes (const char *line, int *ptr);
+void strip_quotes(char *arg);
 
 /* Shell main */
 
@@ -111,17 +113,9 @@ char ** arg_parse (char *line, int *argcptr)
             argc++;
             // Find end of argument
             while (line[ptr] != ' ' && line[ptr] != 0) {
-                // If quote is found, find its partner
-                if (line[ptr] == '"') {
-                    ptr++;
-                    while (line[ptr] != '"' && line[ptr] != 0) {
-                        ptr++;
-                    }
-                    // Print error and return if EOS is reached before another quote is found
-                    if (line[ptr] == 0) {
-                        fprintf(stderr, "Odd number of quotes found in input.\n");
-                        return NULL;
-                    }
+                if (!check_for_quotes(line, &ptr) {
+                    *argcptr = 0;
+                    return NULL;
                 }
                 ptr++;
             }
@@ -139,7 +133,7 @@ char ** arg_parse (char *line, int *argcptr)
     }
 
     ptr = 0;
-    int i = 0; // Current index of argpointers
+    int index = 0; // Current index of argpointers
 
     // Populate argpointers
     while (line[ptr] != 0) {
@@ -148,19 +142,61 @@ char ** arg_parse (char *line, int *argcptr)
             ptr++;
         } else {
             // Argument found
-            argpointers[i] = &line[ptr];
-            i++;
-            // Find end of argument and replace trailing space with 0.
+            argpointers[index] = &line[ptr];
+            index++;
+            // Find end of argument and replace trailing space with 0
             while (line[ptr] != ' ' && line[ptr] != 0) {
+                if (!check_for_quotes(line, &ptr) {
+                    *argcptr = 0;
+                    return NULL;
+                }
                 ptr++;
             }
             line[ptr] = 0;
             ptr++;
         }
     }
+
     // Set last element to NULL for execvp
     argpointers[argc - 1] = NULL;
 
+    // Remove quotes from all arguments
+    for (index = 0; index < argc - 1; index++) {
+        strip_quotes(argpointers + index);
+    }
+
     *argcptr = argc;
     return argpointers;
+}
+
+int check_for_quotes (const char *line, int *ptr)
+{
+    if (line[*ptr] == '"') {
+        // If quote is found, find its partner
+        int tmp_ptr = *ptr;
+        tmp_ptr++;
+        while (line[tmp_ptr] != '"' && line[tmp_ptr] != 0) {
+            tmp_ptr++;
+        }
+
+        // Print error and return if EOS is reached before another quote is found
+        if (line[tmp_ptr] == 0) {
+            fprintf(stderr, "Odd number of quotes found in input.\n");
+            return 0;
+        }
+        *ptr = tmp_ptr;
+    }
+    return 1;
+}
+
+void strip_quotes(char *arg) {
+    int i = 0; // Current index of arg
+    int offset = 0; // Current offset (number of quotes)
+    while (arg[i] != 0) {
+        while (arg[i + offset] == '"') {
+            offset++;
+        }
+        arg[i] = arg[i + offset];
+        i++;
+    }
 }
