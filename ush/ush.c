@@ -113,7 +113,7 @@ char ** arg_parse (char *line, int *argcptr)
             argc++;
             // Find end of argument
             while (line[ptr] != ' ' && line[ptr] != 0) {
-                if (!check_for_quotes(line, &ptr) {
+                if (!check_for_quotes(line, &ptr)) {
                     *argcptr = 0;
                     return NULL;
                 }
@@ -146,7 +146,7 @@ char ** arg_parse (char *line, int *argcptr)
             index++;
             // Find end of argument and replace trailing space with 0
             while (line[ptr] != ' ' && line[ptr] != 0) {
-                if (!check_for_quotes(line, &ptr) {
+                if (!check_for_quotes(line, &ptr)) {
                     *argcptr = 0;
                     return NULL;
                 }
@@ -162,7 +162,7 @@ char ** arg_parse (char *line, int *argcptr)
 
     // Remove quotes from all arguments
     for (index = 0; index < argc - 1; index++) {
-        strip_quotes(argpointers + index);
+        strip_quotes(argpointers[index]);
     }
 
     *argcptr = argc;
