@@ -66,8 +66,6 @@ void processline (char *line)
     int argc; // Number of arguments for executed program
     char **argpointers = arg_parse(line, &argc);
 
-    printf("%d\n", argc);
-
     // Only attempt to execute if input contained any arguments
     if (argc > 0) {
         /* Start a new process to do the job. */
