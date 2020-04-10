@@ -119,7 +119,7 @@ char ** arg_parse (char *line, int *argcptr)
                     }
                     // Print error and return if EOS is reached before another quote is found
                     if (line[ptr] == 0) {
-                        fprintf(stderror, "Odd number of quotes found in input.\n");
+                        fprintf(stderr, "Odd number of quotes found in input.\n");
                         return NULL;
                     }
                 }
