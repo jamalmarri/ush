@@ -120,6 +120,12 @@ char ** arg_parse (char *line, int *argcptr)
         }
     }
 
+    // Return if no arguments were found
+    if (argc < 1) {
+        *argcptr = 0;
+        return NULL;
+    }
+
     // Reserve extra space for NULL pointer at the end
     argc++;
 
@@ -127,7 +133,8 @@ char ** arg_parse (char *line, int *argcptr)
     char ** argpointers = malloc(sizeof(char *) * argc);
     if (argpointers == NULL) {
         fprintf(stderr, "Malloc of argument pointer array failed.\n");
-        exit(1);
+        *argcptr = 0;
+        return NULL;
     }
 
     ptr = 0;
