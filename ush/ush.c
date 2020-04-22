@@ -74,7 +74,7 @@ void processline (char *line)
 
         // Only attempt to execute if input contained any arguments
         if (argc > 0) {
-            int builtin = check_for_builtin(&argpointers[0], argc);
+            int builtin = check_for_builtin(argpointers[0], argc);
             if (!builtin) {
                 /* Start a new process to do the job. */
                 cpid = fork();
