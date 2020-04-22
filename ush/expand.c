@@ -12,14 +12,17 @@
 void print_error(int error_type);
 
 int expand(char *orig, char *new, int newsize) {
+    int ptr = 0;
     for (int i = 0; orig[i] != 0; i++) {
         if (orig[i] == '$') {
             i++;
             if (orig[i] == '$') {
-                if (snprintf(new, newsize, "%d", getpid()) > newsize) {
+                int chars_printed = snprintf(new, newsize, "%d", getpid());
+                if (chars_printed > newsize) {
                     print_error(PID_OVERFLOW);
                     return 0;
                 }
+                ptr += chars_printed;
             } else if (orig[i] == '{') {
                 i++;
                 char *var_name = &orig[i];
@@ -33,16 +36,22 @@ int expand(char *orig, char *new, int newsize) {
                 orig[i] = 0;
                 char *var_value = getenv(var_name);
                 if (var_value != NULL) {
-                    if (snprintf(new, newsize, "%s", var_value) > newsize) {
+                    int chars_printed = snprintf(new, newsize, "%s", var_value);
+                    if (chars_printed > newsize) {
                         print_error(ENV_OVERFLOW);
                         return 0;
                     }
+                    ptr += chars_printed;
                 }
                 orig[i] = '}';
-            }
+            } else {
+                i--;
+                new[ptr] = orig[i];
+                ptr++;
         } else {
-            if (i < newsize) {
-                new[i] = orig[i];
+            if (ptr < newsize) {
+                new[ptr] = orig[i];
+                ptr++;
             } else {
                 print_error(NON_ENV_OVERFLOW);
                 return 0;
