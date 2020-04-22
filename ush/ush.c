@@ -74,28 +74,33 @@ void processline (char *line)
 
         // Only attempt to execute if input contained any arguments
         if (argc > 0) {
-            /* Start a new process to do the job. */
-            cpid = fork();
-            if (cpid < 0) {
-                /* Fork wasn't successful */
-                perror ("fork");
-                return;
-            }
+            int builtin = check_for_builtin(&argpointers[0], argc);
+            if (!builtin) {
+                /* Start a new process to do the job. */
+                cpid = fork();
+                if (cpid < 0) {
+                    /* Fork wasn't successful */
+                    perror ("fork");
+                    return;
+                }
 
-            /* Check for who we are! */
-            if (cpid == 0) {
-                /* We are the child! */
-                execvp(argpointers[0], argpointers);
-                /* execlp returned, wasn't successful */
-                perror ("exec");
-                fclose(stdin);  // avoid a linux stdio bug
-                exit (127);
-            }
+                /* Check for who we are! */
+                if (cpid == 0) {
+                    /* We are the child! */
+                    execvp(argpointers[0], argpointers);
+                    /* execlp returned, wasn't successful */
+                    perror ("exec");
+                    fclose(stdin);  // avoid a linux stdio bug
+                    exit (127);
+                }
 
-            /* Have the parent wait for child to complete */
-            if (wait (&status) < 0) {
-                /* Wait wasn't successful */
-                perror ("wait");
+                /* Have the parent wait for child to complete */
+                if (wait (&status) < 0) {
+                    /* Wait wasn't successful */
+                    perror ("wait");
+                }
+            } else {
+                run_builtin(builtin);
             }
         }
         free(argpointers);
