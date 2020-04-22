@@ -8,14 +8,14 @@ void envset(char **argpointers, int argc);
 void envunset(char **argpointers, int argc);
 void cd(char **argpointers, int argc);
 
-typedef void (*funcptr)(char **);
+typedef void (*funcptr)(char **, int argc);
 
 struct builtin {
     char *name;
     funcptr function;
 };
 
-static builtin builtins[] = {{"exit", exit_shell},
+static struct builtin builtins[] = {{"exit", exit_shell},
                              {"envset", envset},
                              {"envunset", envunset},
                              {"cd", cd}};
