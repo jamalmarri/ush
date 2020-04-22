@@ -65,7 +65,7 @@ void processline (char *line)
     pid_t  cpid;
     int    status;
 
-    char[LINELEN] expanded_line;
+    char expanded_line[LINELEN];
     if (expand(line, expanded_line, LINELEN)) {
         int argc; // Number of arguments for executed program
         char **argpointers = arg_parse(line, &argc);
