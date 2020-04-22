@@ -48,6 +48,7 @@ int expand(char *orig, char *new, int newsize) {
                 i--;
                 new[ptr] = orig[i];
                 ptr++;
+            }
         } else {
             if (ptr < newsize) {
                 new[ptr] = orig[i];
