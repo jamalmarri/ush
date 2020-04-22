@@ -68,7 +68,7 @@ void processline (char *line)
     char expanded_line[LINELEN];
     if (expand(line, expanded_line, LINELEN)) {
         int argc; // Number of arguments for executed program
-        char **argpointers = arg_parse(line, &argc);
+        char **argpointers = arg_parse(expanded_line, &argc);
 
         // Only attempt to execute if input contained any arguments
         if (argc > 0) {
