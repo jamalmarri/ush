@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "defn.h"
 
 /* Constants */
 
@@ -25,7 +26,7 @@
 void processline (char *line);
 char ** arg_parse (char *line, int *argcptr);
 int check_for_quotes (const char *line, int *ptr);
-void strip_quotes(char *arg);
+void strip_quotes (char *arg);
 
 /* Shell main */
 
@@ -194,7 +195,7 @@ int check_for_quotes (const char *line, int *ptr)
     return 1;
 }
 
-void strip_quotes(char *arg) {
+void strip_quotes (char *arg) {
     int i = 0; // Current index of arg
     int offset = 0; // Current offset (number of quotes)
     while (arg[i] != 0) {
