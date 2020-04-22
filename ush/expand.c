@@ -9,14 +9,18 @@
 #define MATCHING_OVERFLOW 3
 #define ENV_OVERFLOW 4
 
+// Prototypes
 void print_error(int error_type);
 
 int expand(char *orig, char *new, int newsize) {
+    // "Pointer" for current position in new
     int ptr = 0;
     for (int i = 0; orig[i] != 0; i++) {
+        // Check if any environment variables are possible
         if (orig[i] == '$') {
             i++;
             if (orig[i] == '$') {
+                // Attempt to expand PID
                 int chars_printed = snprintf(&new[ptr], newsize, "%d", getpid());
                 if (chars_printed > newsize) {
                     print_error(PID_OVERFLOW);
@@ -24,6 +28,7 @@ int expand(char *orig, char *new, int newsize) {
                 }
                 ptr += chars_printed;
             } else if (orig[i] == '{') {
+                // Try to parse an environment variable
                 i++;
                 char *var_name = &orig[i];
                 while (orig[i] != '}') {
@@ -33,9 +38,11 @@ int expand(char *orig, char *new, int newsize) {
                         return 0;
                     }
                 }
+                // Use var_name as a substring
                 orig[i] = 0;
                 char *var_value = getenv(var_name);
                 if (var_value != NULL) {
+                    // Attempt to expand environment variable
                     int chars_printed = snprintf(&new[ptr], newsize, "%s", var_value);
                     if (chars_printed > newsize) {
                         print_error(ENV_OVERFLOW);
@@ -43,13 +50,17 @@ int expand(char *orig, char *new, int newsize) {
                     }
                     ptr += chars_printed;
                 }
+                // Clean up after ourselves
                 orig[i] = '}';
             } else {
+                // We got ahead of ourselves
+                // Back it up and copy the $
                 i--;
                 new[ptr] = orig[i];
                 ptr++;
             }
         } else {
+            // Business as usual, copy the character
             if (ptr < newsize) {
                 new[ptr] = orig[i];
                 ptr++;
@@ -59,6 +70,7 @@ int expand(char *orig, char *new, int newsize) {
             }
         }
     }
+    // Place a 0 at the end to prevent old remnants from leaking out
     if (ptr < newsize) {
         new[ptr] = 0;
     } else {
