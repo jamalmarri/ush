@@ -59,6 +59,12 @@ int expand(char *orig, char *new, int newsize) {
             }
         }
     }
+    if (ptr < newsize) {
+        new[ptr] = 0;
+    } else {
+        print_error(NON_ENV_OVERFLOW);
+        return 0;
+    }
     return 1;
 }
 
