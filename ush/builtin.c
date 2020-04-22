@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include "defn.h"
@@ -32,10 +33,10 @@ int check_for_builtin(char **argpointers, int argc) {
 }
 
 void exit_shell(char **argpointers, int argc) {
-    if (argc < 2) {
+    if (argc < 3) {
         exit(0);
     } else {
-        exit(atoi(*(argpointers[1])));
+        exit(atoi(argpointers[1]));
     }
 }
 
