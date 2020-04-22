@@ -9,4 +9,4 @@ ush: $(DEPEND)
 clean:
 	-rm ush $(DEPEND) 2>/dev/null || true
 
-ush.o expand.o: defn.h
+ush.o expand.o builtin.o: defn.h
