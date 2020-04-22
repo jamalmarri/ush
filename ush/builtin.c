@@ -8,7 +8,7 @@ void cd(char *directory);
 
 typedef void (*funcptr)();
 
-static funcptr builtins[] = {exit,envset,envunset,cd}
+static funcptr builtins[] = {exit,envset,envunset,cd};
 
 int check_for_builtin(char *argpointer, int argc) {
     return 0;
