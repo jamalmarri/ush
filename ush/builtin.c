@@ -32,6 +32,11 @@ int check_for_builtin(char **argpointers, int argc) {
 }
 
 void exit_shell(char **argpointers, int argc) {
+    if (argc < 2) {
+        exit(0);
+    } else {
+        exit(atoi(*(argpointers[1])));
+    }
 }
 
 void envset(char **argpointers, int argc){
