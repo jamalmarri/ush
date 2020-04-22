@@ -74,8 +74,7 @@ void processline (char *line)
 
         // Only attempt to execute if input contained any arguments
         if (argc > 0) {
-            int builtin = check_for_builtin(argpointers[0], argc);
-            if (!builtin) {
+            if (!check_for_builtin(argpointers, argc)) {
                 /* Start a new process to do the job. */
                 cpid = fork();
                 if (cpid < 0) {
@@ -99,8 +98,6 @@ void processline (char *line)
                     /* Wait wasn't successful */
                     perror ("wait");
                 }
-            } else {
-                run_builtin(builtin, argpointers);
             }
         }
         free(argpointers);
