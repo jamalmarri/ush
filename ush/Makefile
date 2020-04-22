@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS= -g -Wall
 
-DEPEND=ush.o expand.o
+DEPEND=ush.o expand.o builtin.o
 
 ush: $(DEPEND)
 	$(CC) $(CFLAGS) -o $@ $(DEPEND)
