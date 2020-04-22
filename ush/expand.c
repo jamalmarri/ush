@@ -17,7 +17,7 @@ int expand(char *orig, char *new, int newsize) {
         if (orig[i] == '$') {
             i++;
             if (orig[i] == '$') {
-                int chars_printed = snprintf(new, newsize, "%d", getpid());
+                int chars_printed = snprintf(new[ptr], newsize, "%d", getpid());
                 if (chars_printed > newsize) {
                     print_error(PID_OVERFLOW);
                     return 0;
@@ -36,7 +36,7 @@ int expand(char *orig, char *new, int newsize) {
                 orig[i] = 0;
                 char *var_value = getenv(var_name);
                 if (var_value != NULL) {
-                    int chars_printed = snprintf(new, newsize, "%s", var_value);
+                    int chars_printed = snprintf(new[ptr], newsize, "%s", var_value);
                     if (chars_printed > newsize) {
                         print_error(ENV_OVERFLOW);
                         return 0;
