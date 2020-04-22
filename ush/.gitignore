@@ -1,2 +1,4 @@
 ush
 ush.o
+builtin.o
+expand.o
