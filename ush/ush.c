@@ -100,7 +100,7 @@ void processline (char *line)
                     perror ("wait");
                 }
             } else {
-                run_builtin(builtin);
+                run_builtin(builtin, argpointers);
             }
         }
         free(argpointers);
