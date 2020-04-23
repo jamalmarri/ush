@@ -70,7 +70,7 @@ void envunset(char **argpointers, int argc) {
 void cd(char **argpointers, int argc) {
     if (argc < 3) {
         if (chdir(getenv("HOME"))) {
-            fprintf(stderr, "Changing directory to home failed!");
+            fprintf(stderr, "Changing directory to home failed!\n");
         }
     } else {
         if (chdir(argpointers[1])) {
