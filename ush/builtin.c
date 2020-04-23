@@ -64,7 +64,7 @@ void envunset(char **argpointers, int argc) {
 
 void cd(char **argpointers, int argc) {
     if (argc < 3) {
-        chdir("~");
+        chdir(getenv("HOME"));
     } else {
         if (chdir(argpointers[1])) {
             perror("chdir");
