@@ -150,7 +150,7 @@ char ** arg_parse (char *line, int *argcptr)
     int index = 0; // Current index of argpointers
 
     // Populate argpointers
-    while (line[ptr] != 0) {
+    while (line[ptr] != 0 && index < argc - 1) {
         if (line[ptr] == ' ') {
             // Skip leading/trailing spaces
             ptr++;
