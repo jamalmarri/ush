@@ -13,20 +13,24 @@ void cd(char **argpointers, int argc);
 
 typedef void (*funcptr)(char **, int argc);
 
+// Used for clean function redirection
 struct builtin {
     char *name;
     funcptr function;
 };
 
+// List of builtins
 static struct builtin builtins[] = {{"exit", exit_shell},
                                     {"envset", envset},
                                     {"envunset", envunset},
                                     {"cd", cd}};
 
 int check_for_builtin(char **argpointers, int argc) {
+    // Try to locate the correct builtin
     int num_builtins = (int) (sizeof(builtins) / sizeof(builtins[0]));
     for (int i = 0; i < num_builtins; i++) {
         if (!strcmp(argpointers[0], builtins[i].name)) {
+            // Execute builtin passing arguments and argc
             (*builtins[i].function)(argpointers, argc);
             return 1;
         }
@@ -36,6 +40,7 @@ int check_for_builtin(char **argpointers, int argc) {
 
 void exit_shell(char **argpointers, int argc) {
     if (argc < 3) {
+        // Default exit code
         exit(0);
     } else {
         exit(atoi(argpointers[1]));
@@ -64,7 +69,9 @@ void envunset(char **argpointers, int argc) {
 
 void cd(char **argpointers, int argc) {
     if (argc < 3) {
-        chdir(getenv("HOME"));
+        if (chdir(getenv("HOME"))) {
+            fprintf(stderr, "Changing directory to home failed!");
+        }
     } else {
         if (chdir(argpointers[1])) {
             perror("chdir");
