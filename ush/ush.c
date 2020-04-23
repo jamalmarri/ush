@@ -67,8 +67,6 @@ void processline (char *line)
 
     char expanded_line[LINELEN];
     if (expand(line, expanded_line, LINELEN)) {
-        printf("Attempting to execute: %s\n", expanded_line);
-
         int argc; // Number of arguments for executed program
         char **argpointers = arg_parse(expanded_line, &argc);
 
