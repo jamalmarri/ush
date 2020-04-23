@@ -98,7 +98,9 @@ void processline (char *line)
                 }
             }
         }
-        free(argpointers);
+        if (argpointers != NULL) {
+            free(argpointers);
+        }
     }
 }
 
