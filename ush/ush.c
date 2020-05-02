@@ -1,10 +1,7 @@
-/* CS 352 -- Micro Shell!
- *
- *   Sept 21, 2000,  Phil Nelson
- *   Modified April 8, 2001
- *   Modified January 6, 2003
- *   Modified January 8, 2017
- *
+/*
+ * CSCI 347 Microshell
+ * Jamal Marri
+ * Spring Quarter 2020
  */
 
 #include <stdio.h>
@@ -23,6 +20,7 @@
 
 /* Prototypes */
 
+int remove_comments(char *buffer);
 void processline (char *line);
 char ** arg_parse (char *line, int *argcptr);
 int check_for_quotes (const char *line, int *ptr);
@@ -37,26 +35,40 @@ main (void)
     int    len;
 
     while (1) {
+        /* prompt and get line */
+        fprintf (stderr, "%% ");
+        if (fgets (buffer, LINELEN, stdin) != buffer) {
+            break;
+        }
 
-    /* prompt and get line */
-    fprintf (stderr, "%% ");
-    if (fgets (buffer, LINELEN, stdin) != buffer)
-        break;
+        if (!remove_comments(buffer)) {
+            /* Get rid of \n at end of buffer. */
+            len = strlen(buffer);
+            if (buffer[len-1] == '\n') {
+                buffer[len-1] = 0;
+            }
+        }
 
-    /* Get rid of \n at end of buffer. */
-    len = strlen(buffer);
-    if (buffer[len-1] == '\n')
-        buffer[len-1] = 0;
-
-    /* Run it ... */
-    processline (buffer);
-
+        /* Run it ... */
+        processline (buffer);
     }
 
-    if (!feof(stdin))
+    if (!feof(stdin)) {
         perror ("read");
+    }
 
     return 0;       /* Also known as exit (0); */
+}
+
+
+int remove_comments(char *buffer) {
+    for (int i = 0; buffer[i] != 0; i++) {
+        if (buffer[i] == '#' && buffer[i - 1] != '$') {
+            buffer[i] = 0;
+            return 1;
+        }
+    }
+    return 0;
 }
 
 
@@ -64,8 +76,8 @@ void processline (char *line)
 {
     pid_t  cpid;
     int    status;
-
     char expanded_line[LINELEN];
+
     if (expand(line, expanded_line, LINELEN)) {
         int argc; // Number of arguments for executed program
         char **argpointers = arg_parse(expanded_line, &argc);
@@ -85,7 +97,7 @@ void processline (char *line)
                 if (cpid == 0) {
                     /* We are the child! */
                     execvp(argpointers[0], argpointers);
-                    /* execlp returned, wasn't successful */
+                    /* execvp returned, wasn't successful */
                     perror ("exec");
                     fclose(stdin);  // avoid a linux stdio bug
                     exit (127);
