@@ -166,7 +166,7 @@ char ** arg_parse (char *line, int *argcptr) {
     int index = 0; // Current index of argpointers
 
     // Populate argpointers
-    while (line[ptr] != 0 && index < argc - 1) {
+    while (line[ptr] != 0 && index < argc) {
         if (line[ptr] == ' ') {
             // Skip leading/trailing spaces
             ptr++;
@@ -188,7 +188,7 @@ char ** arg_parse (char *line, int *argcptr) {
     }
 
     // Set last element to NULL for execvp
-    argpointers[argc + 1] = NULL;
+    argpointers[argc] = NULL;
 
     // Remove quotes from all arguments
     for (index = 0; index < argc; index++) {
