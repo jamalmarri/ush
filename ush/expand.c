@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -75,7 +76,7 @@ int expand(char *orig, char *new, int newsize) {
                 }
                 if (argnumber >= minarg && argnumber < mainargc - shift_offset) {
                     char *argument = mainargv[argnumber];
-                    int chars_printed = snprintf(&new[ptr], newsize - ptr, "%d", argument);
+                    int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s", argument);
                     if (chars_printed > newsize - ptr) {
                         print_error(ARGN_OVERFLOW);
                         return 0;
