@@ -188,7 +188,7 @@ char ** arg_parse (char *line, int *argcptr) {
     }
 
     // Set last element to NULL for execvp
-    argpointers[argc] = NULL;
+    argpointers[argc + 1] = NULL;
 
     // Remove quotes from all arguments
     for (index = 0; index < argc; index++) {
