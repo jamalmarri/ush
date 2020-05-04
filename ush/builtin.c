@@ -91,9 +91,9 @@ void shift(char **argpointers, int argc) {
         n = atoi(argpointers[1]);
     }
     if (n < 0) {
-        fprintf(stderr, "Invalid amount to shift.");
+        fprintf(stderr, "Invalid amount to shift.\n");
     } else if (mainargc - n < 1) {
-        fprintf(stderr, "Not enough arguments to shift %d.", n);
+        fprintf(stderr, "Not enough arguments to shift %d.\n", n);
     } else {
         shift_offset = n;
     }
@@ -105,9 +105,9 @@ void unshift(char **argpointers, int argc) {
     } else {
         int unshift_amount = atoi(argpointers[1]);
         if (unshift_amount < 0) {
-            fprintf(stderr, "Invalid amount to unshift.");
+            fprintf(stderr, "Invalid amount to unshift.\n");
         } else if (unshift_amount > shift_offset) {
-            fprintf(stderr, "Only shifted %d right now. Can't unshift.", shift_offset);
+            fprintf(stderr, "Only shifted %d right now. Can't unshift.\n", shift_offset);
         } else {
             shift_offset -= unshift_amount;
         }
