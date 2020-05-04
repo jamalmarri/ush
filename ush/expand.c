@@ -94,7 +94,7 @@ int expand(char *orig, char *new, int newsize) {
                         ptr += chars_printed;
                     }
                 }
-                while (isdigit(orig[i]) {
+                while (isdigit(orig[i])) {
                     i++;
                 }
             } else {
