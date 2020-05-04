@@ -41,7 +41,7 @@ int main (int argc, char **argv) {
         inputfile = fopen(mainargv[1], "r");
         interactive = 0;
     } else {
-        inputfile = fdopen((int) stdin, "r");
+        inputfile = stdin;
         interactive = 1;
     }
 
@@ -67,7 +67,7 @@ int main (int argc, char **argv) {
         processline (buffer);
     }
 
-    if (!feof(stdin)) {
+    if (!feof(inputfile)) {
         perror ("read");
     }
 
