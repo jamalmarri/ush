@@ -69,12 +69,12 @@ int expand(char *orig, char *new, int newsize) {
                 ptr += chars_printed;
             } else if (isdigit(orig[i])) {
                 int minarg = 0;
-                int argnumber = atoi(&orig[i]) + shift_offset;
+                int argnumber = atoi(&orig[i]);
                 if (mainargc > 1) {
                     argnumber++;
                     minarg = 1;
                 }
-                if (argnumber >= minarg && argnumber <= mainargc - shift_offset) {
+                if (argnumber == minarg) {
                     char *argument = mainargv[argnumber];
                     int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s", argument);
                     if (chars_printed > newsize - ptr) {
@@ -82,6 +82,20 @@ int expand(char *orig, char *new, int newsize) {
                         return 0;
                     }
                     ptr += chars_printed;
+                } else {
+                    argnumber += shift_offset;
+                    if (argnumber >= minarg && argnumber <= mainargc - shift_offset) {
+                        char *argument = mainargv[argnumber];
+                        int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s", argument);
+                        if (chars_printed > newsize - ptr) {
+                            print_error(ARGN_OVERFLOW);
+                            return 0;
+                        }
+                        ptr += chars_printed;
+                    }
+                }
+                while (isdigit(orig[i]) {
+                    i++;
                 }
             } else {
                 // We got ahead of ourselves
