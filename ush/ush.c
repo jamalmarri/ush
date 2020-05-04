@@ -26,12 +26,6 @@ char ** arg_parse (char *line, int *argcptr);
 int check_for_quotes (const char *line, int *ptr);
 void strip_quotes (char *arg);
 
-/* Global Variables */
-
-int mainargc;
-char **mainargv;
-int shift_offset;
-
 /* Shell main */
 
 int main (int argc, char **argv) {
@@ -47,7 +41,7 @@ int main (int argc, char **argv) {
         inputfile = fopen(mainargv[1], "r");
         interactive = 0;
     } else {
-        inputfile = fdopen(stdin, "r");
+        inputfile = fdopen((int) stdin, "r");
         interactive = 1;
     }
 
