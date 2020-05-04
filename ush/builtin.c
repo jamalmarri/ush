@@ -25,8 +25,8 @@ struct builtin {
 static struct builtin builtins[] = {{"exit", exit_shell},
                                     {"envset", envset},
                                     {"envunset", envunset},
-                                    {"cd", cd}
-                                    {"shift", shift}
+                                    {"cd", cd},
+                                    {"shift", shift},
                                     {"unshift", unshift}};
 
 int check_for_builtin(char **argpointers, int argc) {
@@ -93,7 +93,7 @@ void shift(char **argpointers, int argc) {
     if (n < 0) {
         fprintf(stderr, "Invalid amount to shift.");
     } else if (mainargc - n < 1) {
-        fprintf(stderr, "Not enough arguments to shift " + n + ".");
+        fprintf(stderr, "Not enough arguments to shift %d.", n);
     } else {
         shift_offset = n;
     }
@@ -107,7 +107,7 @@ void unshift(char **argpointers, int argc) {
         if (unshift_amount < 0) {
             fprintf(stderr, "Invalid amount to unshift.");
         } else if (unshift_amount > shift_offset) {
-            fprintf(stderr, "Only shifted " + shift_offset + " right now. Can't unshift.");
+            fprintf(stderr, "Only shifted %d right now. Can't unshift.", shift_offset);
         } else {
             shift_offset -= unshift_amount;
         }
