@@ -33,7 +33,7 @@ int main (int argc, char **argv) {
     int interactive;
     char buffer [LINELEN];
     int len;
-    
+
     mainargc = argc;
     mainargv = argv;
 
@@ -50,7 +50,7 @@ int main (int argc, char **argv) {
             /* prompt and get line */
             fprintf (stderr, "%% ");
         }
-        
+
         if (fgets (buffer, LINELEN, inputfile) != buffer) {
             break;
         }
