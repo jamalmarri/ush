@@ -10,6 +10,8 @@ void exit_shell(char **argpointers, int argc);
 void envset(char **argpointers, int argc);
 void envunset(char **argpointers, int argc);
 void cd(char **argpointers, int argc);
+void shift(char **argpointers, int argc);
+void unshift(char **argpointers, int argc);
 
 typedef void (*funcptr)(char **, int argc);
 
@@ -23,7 +25,9 @@ struct builtin {
 static struct builtin builtins[] = {{"exit", exit_shell},
                                     {"envset", envset},
                                     {"envunset", envunset},
-                                    {"cd", cd}};
+                                    {"cd", cd}
+                                    {"shift", shift}
+                                    {"unshift", unshift}};
 
 int check_for_builtin(char **argpointers, int argc) {
     // Try to locate the correct builtin
@@ -39,7 +43,7 @@ int check_for_builtin(char **argpointers, int argc) {
 }
 
 void exit_shell(char **argpointers, int argc) {
-    if (argc < 3) {
+    if (argc < 2) {
         // Default exit code
         exit(0);
     } else {
@@ -48,7 +52,7 @@ void exit_shell(char **argpointers, int argc) {
 }
 
 void envset(char **argpointers, int argc){
-    if (argc < 4) {
+    if (argc < 3) {
         fprintf(stderr, "Not enough arguments for envset NAME VALUE.");
     } else {
         if (setenv(argpointers[1], argpointers[2], 1)) {
@@ -58,8 +62,8 @@ void envset(char **argpointers, int argc){
 }
 
 void envunset(char **argpointers, int argc) {
-    if (argc < 3) {
-        fprintf(stderr, "Not enough arguments for envunset NAME");
+    if (argc < 2) {
+        fprintf(stderr, "Not enough arguments for envunset NAME.");
     } else {
         if (unsetenv(argpointers[1])) {
             perror("unsetenv");
@@ -68,13 +72,44 @@ void envunset(char **argpointers, int argc) {
 }
 
 void cd(char **argpointers, int argc) {
-    if (argc < 3) {
+    if (argc < 2) {
         if (chdir(getenv("HOME"))) {
             fprintf(stderr, "Changing directory to home failed!\n");
         }
     } else {
         if (chdir(argpointers[1])) {
             perror("chdir");
+        }
+    }
+}
+
+void shift(char **argpointers, int argc) {
+    int n;
+    if (argc < 2) {
+        n = 1;
+    } else {
+        n = atoi(argpointers[1]);
+    }
+    if (n < 0) {
+        fprintf(stderr, "Invalid amount to shift.");
+    } else if (mainargc - n < 1) {
+        fprintf(stderr, "Not enough arguments to shift " + n + ".");
+    } else {
+        shift_offset = n;
+    }
+}
+
+void unshift(char **argpointers, int argc) {
+    if (argc < 2) {
+        shift_offset = 0;
+    } else {
+        int unshift_amount = atoi(argpointers[1]);
+        if (unshift_amount < 0) {
+            fprintf(stderr, "Invalid amount to unshift.");
+        } else if (unshift_amount > shift_offset) {
+            fprintf(stderr, "Only shifted " + shift_offset + " right now. Can't unshift.");
+        } else {
+            shift_offset -= unshift_amount;
         }
     }
 }

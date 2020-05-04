@@ -26,18 +26,38 @@ char ** arg_parse (char *line, int *argcptr);
 int check_for_quotes (const char *line, int *ptr);
 void strip_quotes (char *arg);
 
+/* Global Variables */
+
+int mainargc;
+char **mainargv;
+int shift_offset;
+
 /* Shell main */
 
-int
-main (void)
-{
-    char   buffer [LINELEN];
-    int    len;
+int main (int argc, char **argv) {
+    FILE *inputfile;
+    int interactive;
+    char buffer [LINELEN];
+    int len;
+    
+    mainargc = argc;
+    mainargv = argv;
+
+    if (argc > 1) {
+        inputfile = fopen(mainargv[1], "r");
+        interactive = 0;
+    } else {
+        inputfile = fdopen(stdin, "r");
+        interactive = 1;
+    }
 
     while (1) {
-        /* prompt and get line */
-        fprintf (stderr, "%% ");
-        if (fgets (buffer, LINELEN, stdin) != buffer) {
+        if (interactive) {
+            /* prompt and get line */
+            fprintf (stderr, "%% ");
+        }
+        
+        if (fgets (buffer, LINELEN, inputfile) != buffer) {
             break;
         }
 
@@ -60,7 +80,6 @@ main (void)
     return 0;       /* Also known as exit (0); */
 }
 
-
 int remove_comments(char *buffer) {
     for (int i = 0; buffer[i] != 0; i++) {
         if (buffer[i] == '#' && buffer[i - 1] != '$') {
@@ -71,11 +90,9 @@ int remove_comments(char *buffer) {
     return 0;
 }
 
-
-void processline (char *line)
-{
-    pid_t  cpid;
-    int    status;
+void processline (char *line) {
+    pid_t cpid;
+    int status;
     char expanded_line[LINELEN];
 
     if (expand(line, expanded_line, LINELEN)) {
@@ -114,9 +131,7 @@ void processline (char *line)
     }
 }
 
-
-char ** arg_parse (char *line, int *argcptr)
-{
+char ** arg_parse (char *line, int *argcptr) {
     int argc = 0;
     int ptr = 0; // "Pointer" for current position in line
 
@@ -145,11 +160,8 @@ char ** arg_parse (char *line, int *argcptr)
         return NULL;
     }
 
-    // Reserve extra space for NULL pointer at the end
-    argc++;
-
     // Attempt to malloc for argpointers array
-    char ** argpointers = malloc(sizeof(char *) * argc);
+    char ** argpointers = malloc(sizeof(char *) * (argc + 1));
     if (argpointers == NULL) {
         fprintf(stderr, "Malloc of argument pointer array failed.\n");
         *argcptr = 0;
@@ -182,10 +194,10 @@ char ** arg_parse (char *line, int *argcptr)
     }
 
     // Set last element to NULL for execvp
-    argpointers[argc - 1] = NULL;
+    argpointers[argc] = NULL;
 
     // Remove quotes from all arguments
-    for (index = 0; index < argc - 1; index++) {
+    for (index = 0; index < argc; index++) {
         strip_quotes(argpointers[index]);
     }
 
@@ -193,8 +205,7 @@ char ** arg_parse (char *line, int *argcptr)
     return argpointers;
 }
 
-int check_for_quotes (const char *line, int *ptr)
-{
+int check_for_quotes (const char *line, int *ptr) {
     if (line[*ptr] == '"') {
         // If quote is found, find its partner
         int tmp_ptr = *ptr;

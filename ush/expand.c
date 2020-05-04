@@ -8,6 +8,8 @@
 #define PID_OVERFLOW 2
 #define MATCHING_OVERFLOW 3
 #define ENV_OVERFLOW 4
+#define ARGC_OVERFLOW 5
+#define ARGN_OVERFLOW 6
 
 // Prototypes
 void print_error(int error_type);
@@ -22,7 +24,7 @@ int expand(char *orig, char *new, int newsize) {
             if (orig[i] == '$') {
                 // Attempt to expand PID
                 int chars_printed = snprintf(&new[ptr], newsize - ptr, "%d", getpid());
-                if (chars_printed > newsize) {
+                if (chars_printed > newsize - ptr) {
                     print_error(PID_OVERFLOW);
                     return 0;
                 }
@@ -44,7 +46,7 @@ int expand(char *orig, char *new, int newsize) {
                 if (var_value != NULL) {
                     // Attempt to expand environment variable
                     int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s", var_value);
-                    if (chars_printed > newsize) {
+                    if (chars_printed > newsize - ptr) {
                         print_error(ENV_OVERFLOW);
                         return 0;
                     }
@@ -52,6 +54,34 @@ int expand(char *orig, char *new, int newsize) {
                 }
                 // Clean up after ourselves
                 orig[i] = '}';
+            } else if (orig[i] == '#') {
+                // Attempt to expand number of arguments
+                int argc = mainargc - shift_offset;
+                if (argc > 1) {
+                    argc--;
+                }
+                int chars_printed = snprintf(&new[ptr], newsize - ptr, "%d", argc);
+                if (chars_printed > newsize - ptr) {
+                    print_error(ARGC_OVERFLOW);
+                    return 0;
+                }
+                ptr += chars_printed;
+            } else if (isdigit(orig[i])) {
+                int minarg = 0;
+                int argnumber = atoi(&orig[i]) + shift_offset;
+                if (mainargc > 1) {
+                    argnumber++;
+                    minarg = 1;
+                }
+                if (argnumber >= minarg && argnumber < mainargc - shift_offset) {
+                    char *argument = mainargv[argnumber];
+                    int chars_printed = snprintf(&new[ptr], newsize - ptr, "%d", argument);
+                    if (chars_printed > newsize - ptr) {
+                        print_error(ARGN_OVERFLOW);
+                        return 0;
+                    }
+                    ptr += chars_printed;
+                }
             } else {
                 // We got ahead of ourselves
                 // Back it up and copy the $
@@ -93,6 +123,12 @@ void print_error(int error_type) {
             break;
         case ENV_OVERFLOW:
             fprintf(stderr, "Environment variable expansion overflowed.\n");
+            break;
+        case ARGC_OVERFLOW:
+            fprintf(stderr, "Argument count expansion overflowed.\n");
+            break;
+        case ARGN_OVERFLOW:
+            fprintf(stderr, "Argument expansion overflowed.\n");
             break;
     }
     fprintf(stderr, "Line processing halted.\n");
