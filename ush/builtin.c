@@ -125,29 +125,29 @@ void sstat(char **argpointers, int argc) {
         fprintf(stderr, "Not enough arguments for sstat FILE [FILE...]");
     } else {
         for (int i = 1; i < argc; i++) {
-            struct stat *buf;
-            int statreturn = stat(argpointers[i], buf);
+            struct stat buf;
+            int statreturn = stat(argpointers[i], &buf);
             if (statreturn) {
                 perror("stat");
                 continue;
             }
             fprintf(stderr, "%s ", argpointers[i]);
-            struct passwd *userinfo = getpwuid(buf->st_uid);
+            struct passwd *userinfo = getpwuid(buf.st_uid);
             if (userinfo == NULL) {
-                fprintf(stderr, "%d ", buf->st_uid);
+                fprintf(stderr, "%d ", buf.st_uid);
             } else {
-                fprintf(stderr, "%s ", userinfo->pw_name);
+                fprintf(stderr, "%s ", userinfo.pw_name);
             }
-            struct group *groupinfo = getgrgid(buf->st_gid);
+            struct group *groupinfo = getgrgid(buf.st_gid);
             if (groupinfo == NULL) {
-                fprintf(stderr, "%d ", buf->st_gid);
+                fprintf(stderr, "%d ", buf.st_gid);
             } else {
-                fprintf(stderr, "%s ", groupinfo->gr_name);
+                fprintf(stderr, "%s ", groupinfo.gr_name);
             }
             char mode[12];
-            strmode(buf->st_mode, mode);
+            strmode(buf.st_mode, mode);
             fprintf(stderr, "%s ", mode);
-            fprintf(stderr, "%ld %ld %ld\n", buf->st_nlink, buf->st_size, buf->st_mtime);
+            fprintf(stderr, "%ld %ld %ld\n", buf.st_nlink, buf.st_size, buf.st_mtime);
         }
     }
 }
