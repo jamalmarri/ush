@@ -136,13 +136,13 @@ void sstat(char **argpointers, int argc) {
             if (userinfo == NULL) {
                 fprintf(stderr, "%d ", buf.st_uid);
             } else {
-                fprintf(stderr, "%s ", userinfo.pw_name);
+                fprintf(stderr, "%s ", userinfo->pw_name);
             }
             struct group *groupinfo = getgrgid(buf.st_gid);
             if (groupinfo == NULL) {
                 fprintf(stderr, "%d ", buf.st_gid);
             } else {
-                fprintf(stderr, "%s ", groupinfo.gr_name);
+                fprintf(stderr, "%s ", groupinfo->gr_name);
             }
             char mode[12];
             strmode(buf.st_mode, mode);
