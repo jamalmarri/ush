@@ -1,7 +1,11 @@
+#include <grp.h>
+#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "defn.h"
 
@@ -12,6 +16,7 @@ void envunset(char **argpointers, int argc);
 void cd(char **argpointers, int argc);
 void shift(char **argpointers, int argc);
 void unshift(char **argpointers, int argc);
+void sstat(char **argpointers, int argc);
 
 typedef void (*funcptr)(char **, int argc);
 
@@ -27,7 +32,8 @@ static struct builtin builtins[] = {{"exit", exit_shell},
                                     {"envunset", envunset},
                                     {"cd", cd},
                                     {"shift", shift},
-                                    {"unshift", unshift}};
+                                    {"unshift", unshift},
+                                    {"sstat", sstat}};
 
 int check_for_builtin(char **argpointers, int argc) {
     // Try to locate the correct builtin
@@ -110,6 +116,37 @@ void unshift(char **argpointers, int argc) {
             fprintf(stderr, "Only shifted %d right now. Can't unshift.\n", shift_offset);
         } else {
             shift_offset -= unshift_amount;
+        }
+    }
+}
+
+void sstat(char **argpointers, int argc) {
+    if (argc < 2) {
+        fprintf(stderr, "Not enough arguments for sstat FILE [FILE...]");
+    } else {
+        for (int i = 1; i < argc; i++) {
+            struct stat *buf;
+            if (stat(argpointers[i], buf)) {
+                perror("stat");
+                continue;
+            }
+            fprintf(stderr, "%s ", argpointers[i]);
+            struct passwd *userinfo = getpwuid(buf.st_uid);
+            if (userinfo == NULL) {
+                fprintf(stderr, "%d ", buf.st_uid);
+            } else {
+                fprintf(stderr, "%s ", userinfo.pw_name);
+            }
+            struct group *groupinfo = getgrgid(buf.st_gid);
+            if (groupinfo == NULL) {
+                fprintf(stderr, "%d ", buf.st_gid);
+            } else {
+                fprintf(stderr, "%s ", groupinfo.gr_name);
+            }
+            char mode[12];
+            strmode(buf.st_mode, mode);
+            fprintf(stderr, "%s ", mode);
+            fprintf(stderr, "%d %d %s\n", st_nlink, st_size, st_mtime);
         }
     }
 }
