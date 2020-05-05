@@ -126,7 +126,8 @@ void sstat(char **argpointers, int argc) {
     } else {
         for (int i = 1; i < argc; i++) {
             struct stat *buf;
-            if (stat(argpointers[i], buf)) {
+            int statreturn = stat(argpointers[i], buf);
+            if (statreturn) {
                 perror("stat");
                 continue;
             }
