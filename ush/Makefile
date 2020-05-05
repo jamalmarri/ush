@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS= -g -Wall
 
-DEPEND=ush.o expand.o builtin.o
+DEPEND=ush.o expand.o builtin.o strmode.o
 
 ush: $(DEPEND)
 	$(CC) $(CFLAGS) -o $@ $(DEPEND)
@@ -9,4 +9,4 @@ ush: $(DEPEND)
 clean:
 	-rm ush $(DEPEND) 2>/dev/null || true
 
-ush.o expand.o builtin.o: defn.h
+ush.o expand.o builtin.o strmode.o: defn.h
