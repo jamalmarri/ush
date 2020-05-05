@@ -122,7 +122,7 @@ void unshift(char **argpointers, int argc) {
 
 void sstat(char **argpointers, int argc) {
     if (argc < 2) {
-        fprintf(stderr, "Not enough arguments for sstat FILE [FILE...]");
+        fprintf(stderr, "Not enough arguments for sstat FILE [FILE...]\n");
     } else {
         for (int i = 1; i < argc; i++) {
             struct stat buf;
