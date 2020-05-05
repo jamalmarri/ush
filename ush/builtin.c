@@ -147,7 +147,7 @@ void sstat(char **argpointers, int argc) {
             char mode[12];
             strmode(buf->st_mode, mode);
             fprintf(stderr, "%s ", mode);
-            fprintf(stderr, "%d %d %s\n", buf->st_nlink, buf->st_size, buf->st_mtime);
+            fprintf(stderr, "%ld %ld %ld\n", buf->st_nlink, buf->st_size, buf->st_mtime);
         }
     }
 }
