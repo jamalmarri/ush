@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,6 +12,7 @@
 #define ENV_OVERFLOW 4
 #define ARGC_OVERFLOW 5
 #define ARGN_OVERFLOW 6
+#define WILD_OVERFLOW 7
 
 // Prototypes
 void print_error(int error_type);
@@ -104,6 +106,40 @@ int expand(char *orig, char *new, int newsize) {
                 new[ptr] = orig[i];
                 ptr++;
             }
+        } else if (orig[i] == '*') {
+            if (orig[i - 1] == ' ' || orig[i - 1] == '"') {
+                DIR *cur_dir = opendir(".");
+                if (cur_dir == NULL) {
+                    perror("opendir");
+                    return 0;
+                }
+                struct dirent *direntry;
+                int entries_found = 0;
+                if (orig[i + 1] == ' ' || orig[i + 1] == '"') {
+                    // Default *
+                    while (direntry = readdir(cur_dir)) {
+                        char *entname = direntry->d_name;
+                        if (entname[0] != '.') {
+                            entries_found++;
+                            int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s ", entname);
+                            if (chars_printed > newsize - ptr) {
+                                print_error(WILD_OVERFLOW);
+                                return 0;
+                            }
+                            ptr += chars_printed;
+                        }
+                    }
+                } else {
+                    // Pattern matching *
+                }
+                if (entries_found) {
+                    i++;
+                    ptr--;
+                }
+                if (closedir(cur_dir)) {
+                    perror("closedir");
+                }
+            }
         } else {
             // Business as usual, copy the character
             if (ptr < newsize) {
@@ -144,6 +180,9 @@ void print_error(int error_type) {
             break;
         case ARGN_OVERFLOW:
             fprintf(stderr, "Argument expansion overflowed.\n");
+            break;
+        case WILD_OVERFLOW:
+            fprintf(stderr, "Wildcard expansion overflowed.\n");
             break;
     }
     fprintf(stderr, "Line processing halted.\n");
