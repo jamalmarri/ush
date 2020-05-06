@@ -152,7 +152,7 @@ int expand(char *orig, char *new, int newsize) {
                     char *entname = direntry->d_name;
                     if (entname[0] != '.') {
                         int pattern_pos = strlen(entname) - pat_chars;
-                        if (!strncmp(&entname[pattern_pos], pattern, 1)) {
+                        if (!strncmp(&entname[pattern_pos], pattern, pat_chars)) {
                             entries_found++;
                             int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s ", entname);
                             if (chars_printed > newsize - ptr) {
