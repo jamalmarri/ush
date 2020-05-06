@@ -133,12 +133,13 @@ int expand(char *orig, char *new, int newsize) {
                     // Pattern matching *
                 }
                 if (entries_found) {
-                    i++;
                     ptr--;
                 }
                 if (closedir(cur_dir)) {
                     perror("closedir");
                 }
+            } else {
+                i--;
             }
         } else {
             // Business as usual, copy the character
