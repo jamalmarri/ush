@@ -99,10 +99,10 @@ void shift(char **argpointers, int argc) {
     }
     if (n < 0) {
         fprintf(stderr, "Invalid amount to shift.\n");
-    } else if (mainargc - n < 1) {
+    } else if (mainargc - (n + shift_offset) < 2) {
         fprintf(stderr, "Not enough arguments to shift %d.\n", n);
     } else {
-        shift_offset = n;
+        shift_offset += n;
     }
 }
 
