@@ -165,6 +165,9 @@ int expand(char *orig, char *new, int newsize) {
                 }
                 if (entries_found) {
                     i += pat_chars;
+                } else {
+                    new[ptr] = '*';
+                    ptr++;
                 }
             }
             if (entries_found) {
