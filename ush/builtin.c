@@ -92,11 +92,14 @@ void cd(char **argpointers, int argc) {
 
 void shift(char **argpointers, int argc) {
     int n;
+    // Determine shift value
     if (argc < 2) {
+        // Default value
         n = 1;
     } else {
         n = atoi(argpointers[1]);
     }
+    // Check for valid shift amount
     if (n < 0) {
         fprintf(stderr, "Invalid amount to shift.\n");
     } else if (mainargc - (n + shift_offset) < 2) {
@@ -108,9 +111,11 @@ void shift(char **argpointers, int argc) {
 
 void unshift(char **argpointers, int argc) {
     if (argc < 2) {
+        // Default case
         shift_offset = 0;
     } else {
         int unshift_amount = atoi(argpointers[1]);
+        // Check for valid unshift amount
         if (unshift_amount < 0) {
             fprintf(stderr, "Invalid amount to unshift.\n");
         } else if (unshift_amount > shift_offset) {
@@ -125,31 +130,40 @@ void sstat(char **argpointers, int argc) {
     if (argc < 2) {
         fprintf(stderr, "Not enough arguments for sstat FILE [FILE...]\n");
     } else {
+        // For every file specified
         for (int i = 1; i < argc; i++) {
+            // Attempt to stat it
             struct stat buf;
             int statreturn = stat(argpointers[i], &buf);
             if (statreturn) {
                 perror("stat");
                 continue;
             }
+            // Print the file name
             printf("%s ", argpointers[i]);
+            // Print the username, or UID if username isn't found
             struct passwd *userinfo = getpwuid(buf.st_uid);
             if (userinfo == NULL) {
                 printf("%d ", buf.st_uid);
             } else {
                 printf("%s ", userinfo->pw_name);
             }
+            // Print the groupname, or GID if groupname isn't found
             struct group *groupinfo = getgrgid(buf.st_gid);
             if (groupinfo == NULL) {
                 printf("%d ", buf.st_gid);
             } else {
                 printf("%s ", groupinfo->gr_name);
             }
+            // Print the permission bits in a nice format
             char mode[12];
             strmode(buf.st_mode, mode);
             printf("%s", mode);
+            // Get date and format it
             char *date = asctime(localtime(&buf.st_mtime));
+            // Print number of links, size in bytes, and formatted date
             printf("%ld %ld %s", buf.st_nlink, buf.st_size, date);
+            // Date contains a newline, so flush manually
             fflush(stdout);
         }
     }
