@@ -117,7 +117,7 @@ int expand(char *orig, char *new, int newsize) {
                 int entries_found = 0;
                 if (orig[i + 1] == ' ' || orig[i + 1] == '"') {
                     // Default *
-                    while (direntry = readdir(cur_dir)) {
+                    while ((direntry = readdir(cur_dir))) {
                         char *entname = direntry->d_name;
                         if (entname[0] != '.') {
                             entries_found++;
