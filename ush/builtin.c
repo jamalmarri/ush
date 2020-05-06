@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -147,7 +148,8 @@ void sstat(char **argpointers, int argc) {
             char mode[12];
             strmode(buf.st_mode, mode);
             fprintf(stderr, "%s ", mode);
-            fprintf(stderr, "%ld %ld %ld\n", buf.st_nlink, buf.st_size, buf.st_mtime);
+            char *date = asctime(localtime(&buf.st_mtime));
+            fprintf(stderr, "%ld %ld %s\n", buf.st_nlink, buf.st_size, date);
         }
     }
 }
