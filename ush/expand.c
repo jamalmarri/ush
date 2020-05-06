@@ -130,6 +130,34 @@ int expand(char *orig, char *new, int newsize) {
                 }
             } else {
                 // Pattern matching *
+                int pat_chars = 0;
+                while (orig[i + pat_chars] != 0) {
+                    if (orig[i + pat_chars] != ' ' && orig[i + pat_chars] != '"') {
+                        pat_chars++;
+                    }
+                }
+                char pattern[pat_chars];
+                for (int j = 0; j < pat_chars; j++) {
+                    pattern[j] = orig[i + j];
+                }
+                while ((direntry = readdir(cur_dir))) {
+                    char *entname = direntry->d_name;
+                    if (entname[0] != '.') {
+                        int pattern_pos = (strlen(entname) - 1) - pat_chars;
+                        if (!strcmp(&entname[pattern_pos], pattern)) {
+                            entries_found++;
+                            int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s ", entname);
+                            if (chars_printed > newsize - ptr) {
+                                print_error(WILD_OVERFLOW);
+                                return 0;
+                            }
+                            ptr += chars_printed;
+                        }
+                    }
+                }
+                if (entries_found) {
+                    i += pat_chars;
+                }
             }
             if (entries_found) {
                 ptr--;
