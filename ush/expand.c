@@ -100,6 +100,7 @@ int expand(char *orig, char *new, int newsize) {
                 while (isdigit(orig[i])) {
                     i++;
                 }
+                i--;
             } else {
                 // We got ahead of ourselves
                 // Back it up and copy the $
