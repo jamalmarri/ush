@@ -87,7 +87,7 @@ int expand(char *orig, char *new, int newsize) {
                     ptr += chars_printed;
                 } else {
                     argnumber += shift_offset;
-                    if (argnumber >= minarg && argnumber <= mainargc - shift_offset) {
+                    if (argnumber >= minarg && argnumber < mainargc) {
                         char *argument = mainargv[argnumber];
                         int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s", argument);
                         if (chars_printed > newsize - ptr) {
