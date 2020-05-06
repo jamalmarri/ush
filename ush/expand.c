@@ -115,7 +115,7 @@ int expand(char *orig, char *new, int newsize) {
                 }
                 struct dirent *direntry;
                 int entries_found = 0;
-                if (orig[i + 1] == ' ' || orig[i + 1] == '"') {
+                if (orig[i + 1] == ' ' || orig[i + 1] == '"' || orig[i + 1] == 0) {
                     // Default *
                     while ((direntry = readdir(cur_dir))) {
                         char *entname = direntry->d_name;
