@@ -45,6 +45,11 @@ int main (int argc, char **argv) {
         interactive = 1;
     }
 
+    if (inputfile == NULL) {
+        perror("fopen");
+        return 127;
+    }
+
     while (1) {
         if (interactive) {
             /* prompt and get line */
