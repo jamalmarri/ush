@@ -2,3 +2,4 @@ ush
 ush.o
 builtin.o
 expand.o
+strmode.o
