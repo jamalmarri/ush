@@ -1,0 +1,59 @@
+echo ---Starting test of ush.
+echo
+echo ---Now testing comment removal.
+echo The following text should be removed:#remove me
+echo
+echo ---Now testing basic argument parsing.
+echo Script is $0, Arg 1 is $1, and Arg 2 is $2
+echo Number of arguments is $#, should be 10
+echo
+echo ---Now testing shift command.
+echo Shifting 1
+shift
+echo Script is $0, Arg 1 is $1, and Arg 2 is $2
+echo Number of arguments is $#, should be 9
+echo Shifting 5
+shift 5
+echo Script is $0, Arg 1 is $1, and Arg 2 is $2
+echo Number of arguments is $#, should be 4
+echo Shifting 5 (should fail)
+shift 5
+echo
+echo ---Now testing unshift command (still shifted 6).
+echo Unshifting 1
+unshift 1
+echo Script is $0, Arg 1 is $1, and Arg 2 is $2
+echo Number of arguments is $#, should be 5
+echo Unshifting 5
+unshift 5
+echo Script is $0, Arg 1 is $1, and Arg 2 is $2
+echo Number of arguments is $#, should be 10
+echo Unshifting 5 (should fail)
+unshift 5
+echo Unshifting all (never fails, sets shift to 0)
+unshift
+echo
+echo ---Now testing default wildcard (no pattern).
+echo This directory contains: *
+echo This wildcard shouldn't expand:*
+echo This wildcard should expand:"*"
+echo
+echo ---Now testing patterned wildcard.
+echo List of all files ending in c: *c
+echo This wildcard shouldn't expand:*c
+echo This wildcard should expand:"*c"
+echo No match will be found here: *aaa
+echo Attempting to use '/' character
+echo */c
+echo
+echo ---Now testing sstat
+echo Doing sstat on ush.c
+sstat ush.c
+echo
+echo Doing sstat on all files
+sstat *
+echo
+echo Doing sstat on all files ending with 'c'
+sstat *c
+echo
+echo ---Testing complete.
