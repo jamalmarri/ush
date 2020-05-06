@@ -132,20 +132,26 @@ int expand(char *orig, char *new, int newsize) {
             } else {
                 // Pattern matching *
                 int pat_chars = 0;
-                while (orig[i + pat_chars] != 0) {
-                    if (orig[i + pat_chars] != ' ' && orig[i + pat_chars] != '"') {
+                while (orig[i + pat_chars + 1] != 0) {
+                    if (orig[i + pat_chars + 1] != ' ' && orig[i + pat_chars + 1] != '"') {
+                        if (orig[i + pat_chars + 1] == '/') {
+                            fprintf(stderr, "Wildcard pattern cannot contain '/'.\n");
+                            return 0;
+                        }
                         pat_chars++;
+                    } else {
+                        break;
                     }
                 }
                 char pattern[pat_chars];
                 for (int j = 0; j < pat_chars; j++) {
-                    pattern[j] = orig[i + j];
+                    pattern[j] = orig[i + j + 1];
                 }
                 while ((direntry = readdir(cur_dir))) {
                     char *entname = direntry->d_name;
                     if (entname[0] != '.') {
-                        int pattern_pos = (strlen(entname) - 1) - pat_chars;
-                        if (!strcmp(&entname[pattern_pos], pattern)) {
+                        int pattern_pos = strlen(entname) - pat_chars;
+                        if (!strncmp(&entname[pattern_pos], pattern, 1)) {
                             entries_found++;
                             int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s ", entname);
                             if (chars_printed > newsize - ptr) {
