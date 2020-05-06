@@ -137,6 +137,8 @@ int expand(char *orig, char *new, int newsize) {
             if (closedir(cur_dir)) {
                 perror("closedir");
             }
+        } else if (orig[i] == '*' && orig[i - 1] == '\\') {
+            new[ptr - 1] = '*';
         } else {
             // Business as usual, copy the character
             if (ptr < newsize) {
