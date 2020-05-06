@@ -150,6 +150,7 @@ void sstat(char **argpointers, int argc) {
             printf("%s", mode);
             char *date = asctime(localtime(&buf.st_mtime));
             printf("%ld %ld %s", buf.st_nlink, buf.st_size, date);
+            fflush(stdout);
         }
     }
 }
