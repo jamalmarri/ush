@@ -132,24 +132,24 @@ void sstat(char **argpointers, int argc) {
                 perror("stat");
                 continue;
             }
-            fprintf(stderr, "%s ", argpointers[i]);
+            printf("%s ", argpointers[i]);
             struct passwd *userinfo = getpwuid(buf.st_uid);
             if (userinfo == NULL) {
-                fprintf(stderr, "%d ", buf.st_uid);
+                printf("%d ", buf.st_uid);
             } else {
-                fprintf(stderr, "%s ", userinfo->pw_name);
+                printf("%s ", userinfo->pw_name);
             }
             struct group *groupinfo = getgrgid(buf.st_gid);
             if (groupinfo == NULL) {
-                fprintf(stderr, "%d ", buf.st_gid);
+                printf("%d ", buf.st_gid);
             } else {
-                fprintf(stderr, "%s ", groupinfo->gr_name);
+                printf("%s ", groupinfo->gr_name);
             }
             char mode[12];
             strmode(buf.st_mode, mode);
-            fprintf(stderr, "%s ", mode);
+            printf("%s ", mode);
             char *date = asctime(localtime(&buf.st_mtime));
-            fprintf(stderr, "%ld %ld %s\n", buf.st_nlink, buf.st_size, date);
+            printf("%ld %ld %s\n", buf.st_nlink, buf.st_size, date);
         }
     }
 }
