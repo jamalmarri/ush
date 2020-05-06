@@ -30,17 +30,20 @@ void strip_quotes (char *arg);
 
 int main (int argc, char **argv) {
     FILE *inputfile;
-    int interactive;
+    int interactive; // "Boolean" representing if the shell is in interactive mode
     char buffer [LINELEN];
     int len;
 
+    // Initialize global references to argc and argv
     mainargc = argc;
     mainargv = argv;
 
     if (argc > 1) {
+        // Attempt to open inputted script file
         inputfile = fopen(mainargv[1], "r");
         interactive = 0;
     } else {
+        // Just take standard input
         inputfile = stdin;
         interactive = 1;
     }
