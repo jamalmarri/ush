@@ -59,11 +59,14 @@ int expand(char *orig, char *new, int newsize) {
                 // Clean up after ourselves
                 orig[i] = '}';
             } else if (orig[i] == '#') {
-                // Attempt to expand number of arguments
+                // Apply shift offset
                 int argc = mainargc - shift_offset;
+                // If running a script, ush isn't argument 0
                 if (argc > 1) {
+                    // Decrement argc for accurate count
                     argc--;
                 }
+                // Attempt to expand number of arguments
                 int chars_printed = snprintf(&new[ptr], newsize - ptr, "%d", argc);
                 if (chars_printed > newsize - ptr) {
                     print_error(ARGC_OVERFLOW);
@@ -73,12 +76,16 @@ int expand(char *orig, char *new, int newsize) {
             } else if (isdigit(orig[i])) {
                 int minarg = 0;
                 int argnumber = atoi(&orig[i]);
+                // If running a script, ush isn't argument 0
                 if (mainargc > 1) {
+                    // Update argnumber and minarg appropriately
                     argnumber++;
                     minarg = 1;
                 }
                 if (argnumber == minarg) {
+                    // Base case (script name)
                     char *argument = mainargv[argnumber];
+                    // Attempt to expand base argument (script name)
                     int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s", argument);
                     if (chars_printed > newsize - ptr) {
                         print_error(ARGN_OVERFLOW);
@@ -86,8 +93,10 @@ int expand(char *orig, char *new, int newsize) {
                     }
                     ptr += chars_printed;
                 } else {
+                    // Apply shift offset
                     argnumber += shift_offset;
                     if (argnumber >= minarg && argnumber < mainargc) {
+                        // If argnumber is within bounds, attempt to expand it
                         char *argument = mainargv[argnumber];
                         int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s", argument);
                         if (chars_printed > newsize - ptr) {
@@ -97,9 +106,11 @@ int expand(char *orig, char *new, int newsize) {
                         ptr += chars_printed;
                     }
                 }
+                // Skip remaining original argument
                 while (isdigit(orig[i])) {
                     i++;
                 }
+                // Step back one to prevent overwriting next character
                 i--;
             } else {
                 // We got ahead of ourselves
@@ -109,6 +120,7 @@ int expand(char *orig, char *new, int newsize) {
                 ptr++;
             }
         } else if (orig[i] == '*' && (orig[i - 1] == ' ' || orig[i - 1] == '"')) {
+            // Valid wildcard found, attempt to open the current directory
             DIR *cur_dir = opendir(".");
             if (cur_dir == NULL) {
                 perror("opendir");
@@ -119,9 +131,11 @@ int expand(char *orig, char *new, int newsize) {
             if (orig[i + 1] == ' ' || orig[i + 1] == '"' || orig[i + 1] == 0) {
                 // Default *
                 while ((direntry = readdir(cur_dir))) {
+                    // Find all valid entry names (doesn't start with '.')
                     char *entname = direntry->d_name;
                     if (entname[0] != '.') {
                         entries_found++;
+                        // Attempt to expand entry name
                         int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s ", entname);
                         if (chars_printed > newsize - ptr) {
                             print_error(WILD_OVERFLOW);
@@ -135,6 +149,7 @@ int expand(char *orig, char *new, int newsize) {
                 int pat_chars = 0;
                 while (orig[i + pat_chars + 1] != 0) {
                     if (orig[i + pat_chars + 1] != ' ' && orig[i + pat_chars + 1] != '"') {
+                        // Find end of pattern, throw error and return if a '/' is found
                         if (orig[i + pat_chars + 1] == '/') {
                             fprintf(stderr, "Wildcard pattern cannot contain '/'.\n");
                             return 0;
@@ -144,16 +159,20 @@ int expand(char *orig, char *new, int newsize) {
                         break;
                     }
                 }
+                // Declare and initialize pattern array
                 char pattern[pat_chars];
                 for (int j = 0; j < pat_chars; j++) {
                     pattern[j] = orig[i + j + 1];
                 }
                 while ((direntry = readdir(cur_dir))) {
+                    // Find all valid entry names (doesn't start with '.')
                     char *entname = direntry->d_name;
                     if (entname[0] != '.') {
+                        // Check if pattern matches
                         int pattern_pos = strlen(entname) - pat_chars;
                         if (!strncmp(&entname[pattern_pos], pattern, pat_chars)) {
                             entries_found++;
+                            // Attempt to expand entry name
                             int chars_printed = snprintf(&new[ptr], newsize - ptr, "%s ", entname);
                             if (chars_printed > newsize - ptr) {
                                 print_error(WILD_OVERFLOW);
@@ -166,17 +185,21 @@ int expand(char *orig, char *new, int newsize) {
                 if (entries_found) {
                     i += pat_chars;
                 } else {
+                    // If no entries were found, simply print the '*' and continue
                     new[ptr] = '*';
                     ptr++;
                 }
             }
+            // Remove last trailing space character if any valid entries were found
             if (entries_found) {
                 ptr--;
             }
+            // Attempt to close current directory
             if (closedir(cur_dir)) {
                 perror("closedir");
             }
         } else if (orig[i] == '*' && orig[i - 1] == '\\') {
+            // Escape sequence '\*', just print '*'
             new[ptr - 1] = '*';
         } else {
             // Business as usual, copy the character
