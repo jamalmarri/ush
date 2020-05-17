@@ -126,6 +126,12 @@ void processline (char *line) {
                 if (wait (&status) < 0) {
                     /* Wait wasn't successful */
                     perror ("wait");
+                } else {
+                    if (WIFEXITED(status)) {
+                        last_exit = WEXITSTATUS(status);
+                    } else if (WIFSIGNALED(status)) {
+                        last_exit = 128 + WTERMSIG(status);
+                    }
                 }
             }
         }
