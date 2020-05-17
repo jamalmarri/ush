@@ -1,3 +1,9 @@
+/*
+ * CSCI 347 Microshell
+ * Jamal Marri
+ * Spring Quarter 2020
+ */
+
 #include <ctype.h>
 #include <dirent.h>
 #include <stdio.h>
@@ -13,7 +19,8 @@
 #define ENV_OVERFLOW 4
 #define ARGC_OVERFLOW 5
 #define ARGN_OVERFLOW 6
-#define WILD_OVERFLOW 7
+#define LAST_EXIT_OVERFLOW 7
+#define WILD_OVERFLOW 8
 
 // Prototypes
 void print_error(int error_type);
@@ -112,6 +119,14 @@ int expand(char *orig, char *new, int newsize) {
                 }
                 // Step back one to prevent overwriting next character
                 i--;
+            } else if (orig[i] == '?') {
+                // Attempt to expand last command exit value
+                int chars_printed = snprintf(&new[ptr], newsize - ptr, "%d", last_exit);
+                if (chars_printed > newsize - ptr) {
+                    print_error(LAST_EXIT_OVERFLOW);
+                    return 0;
+                }
+                ptr += chars_printed;
             } else {
                 // We got ahead of ourselves
                 // Back it up and copy the $
@@ -241,6 +256,9 @@ void print_error(int error_type) {
             break;
         case ARGN_OVERFLOW:
             fprintf(stderr, "Argument expansion overflowed.\n");
+            break;
+        case LAST_EXIT_OVERFLOW:
+            fprintf(stderr, "Last exit value expansion overflowed.\n");
             break;
         case WILD_OVERFLOW:
             fprintf(stderr, "Wildcard expansion overflowed.\n");
