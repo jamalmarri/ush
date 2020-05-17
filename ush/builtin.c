@@ -61,9 +61,13 @@ void exit_shell(char **argpointers, int argc) {
 void envset(char **argpointers, int argc){
     if (argc < 3) {
         fprintf(stderr, "Not enough arguments for envset NAME VALUE.");
+        last_exit = 1;
     } else {
         if (setenv(argpointers[1], argpointers[2], 1)) {
             perror("setenv");
+            last_exit = 1;
+        } else {
+            last_exit = 0;
         }
     }
 }
@@ -71,9 +75,13 @@ void envset(char **argpointers, int argc){
 void envunset(char **argpointers, int argc) {
     if (argc < 2) {
         fprintf(stderr, "Not enough arguments for envunset NAME.");
+        last_exit = 1;
     } else {
         if (unsetenv(argpointers[1])) {
             perror("unsetenv");
+            last_exit = 1;
+        } else {
+            last_exit = 0;
         }
     }
 }
@@ -82,10 +90,16 @@ void cd(char **argpointers, int argc) {
     if (argc < 2) {
         if (chdir(getenv("HOME"))) {
             fprintf(stderr, "Changing directory to home failed!\n");
+            last_exit = 1;
+        } else {
+            last_exit = 0;
         }
     } else {
         if (chdir(argpointers[1])) {
             perror("chdir");
+            last_exit = 1;
+        } else {
+            last_exit = 0;
         }
     }
 }
@@ -102,10 +116,13 @@ void shift(char **argpointers, int argc) {
     // Check for valid shift amount
     if (n < 0) {
         fprintf(stderr, "Invalid amount to shift.\n");
+        last_exit = 1;
     } else if (mainargc - (n + shift_offset) < 2) {
         fprintf(stderr, "Not enough arguments to shift %d.\n", n);
+        last_exit = 1;
     } else {
         shift_offset += n;
+        last_exit = 0;
     }
 }
 
@@ -113,15 +130,19 @@ void unshift(char **argpointers, int argc) {
     if (argc < 2) {
         // Default case
         shift_offset = 0;
+        last_exit = 0;
     } else {
         int unshift_amount = atoi(argpointers[1]);
         // Check for valid unshift amount
         if (unshift_amount < 0) {
             fprintf(stderr, "Invalid amount to unshift.\n");
+            last_exit = 1;
         } else if (unshift_amount > shift_offset) {
             fprintf(stderr, "Only shifted %d right now. Can't unshift.\n", shift_offset);
+            last_exit = 1;
         } else {
             shift_offset -= unshift_amount;
+            last_exit = 0;
         }
     }
 }
@@ -129,6 +150,7 @@ void unshift(char **argpointers, int argc) {
 void sstat(char **argpointers, int argc) {
     if (argc < 2) {
         fprintf(stderr, "Not enough arguments for sstat FILE [FILE...]\n");
+        last_exit = 1;
     } else {
         // For every file specified
         for (int i = 1; i < argc; i++) {
@@ -166,5 +188,6 @@ void sstat(char **argpointers, int argc) {
             // Date contains a newline, so flush manually
             fflush(stdout);
         }
+        last_exit = 0;
     }
 }
