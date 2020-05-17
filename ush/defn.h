@@ -1,3 +1,9 @@
+/*
+ * CSCI 347 Microshell
+ * Jamal Marri
+ * Spring Quarter 2020
+ */
+
 #pragma once
 
 int expand(char *orig, char *new, int newsize);

@@ -1,3 +1,9 @@
+/*
+ * CSCI 347 Microshell
+ * Jamal Marri
+ * Spring Quarter 2020
+ */
+
 #include <grp.h>
 #include <pwd.h>
 #include <stdio.h>
