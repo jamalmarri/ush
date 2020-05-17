@@ -11,3 +11,4 @@ void strmode(mode_t mode, char *p);
 int mainargc;
 char **mainargv;
 int shift_offset;
+int last_exit;
