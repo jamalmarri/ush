@@ -118,9 +118,9 @@ int processline(char *line, int outfd, int flags) {
                             perror("dup2");
                         }
                     }
-                    // Close all non-std file descriptors
-                    for (int i = 3; i < NOFILE; i++) {
-                        close(i);
+                    // Close outfd
+                    if (close(outfd)) {
+                        perror("close");
                     }
                     // Execute expanded/parsed line
                     execvp(argpointers[0], argpointers);

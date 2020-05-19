@@ -98,29 +98,42 @@ int expand(char *orig, char *new, int newsize) {
                 int cpid = processline(cmd_exp, pipefd[1], NOWAIT);
                 if (cpid < 0) {
                     print_error(CMD_FORK_ERROR);
-                    close(pipefd[0]);
-                    close(pipefd[1]);
+                    if (close(pipefd[0])) {
+                        perror("close");
+                    }
+                    if (close(pipefd[1])) {
+                        perror("close");
+                    }
                     return 0;
                 }
                 // No writing is done on this end
-                close(pipefd[1]);
+                if (close(pipefd[1])) {
+                    perror("close");
+                    return 0;
+                }
                 // Read from pipe
                 int tmp_ptr = ptr; // Save current pointer for later
                 int chars_printed = -1;
                 while (chars_printed != 0) {
                     if (sigint_caught) {
-                        close(pipefd[0]);
+                        if (close(pipefd[0])) {
+                            perror("close");
+                        }
                         return 0;
                     }
                     chars_printed = read(pipefd[0], &new[ptr], newsize - ptr);
                     if (chars_printed < 0) {
                         perror("read");
-                        close(pipefd[0]);
+                        if (close(pipefd[0])) {
+                            perror("close");
+                        }
                         return 0;
                     }
                     if (chars_printed > newsize - ptr) {
                         print_error(CMD_EXP_OVERFLOW);
-                        close(pipefd[0]);
+                        if (close(pipefd[0])) {
+                            perror("close");
+                        }
                         return 0;
                     }
                     ptr += chars_printed;
@@ -137,7 +150,10 @@ int expand(char *orig, char *new, int newsize) {
                     tmp_ptr++;
                 }
                 // Close read end of pipe
-                close(pipefd[0]);
+                if (close(pipefd[0])) {
+                    perror("close");
+                    return 0;
+                }
                 // Wait on child if one was created
                 if (cpid > 0) {
                     if (waitpid(cpid, NULL, 0) < 0) {
