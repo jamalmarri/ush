@@ -98,6 +98,8 @@ int expand(char *orig, char *new, int newsize) {
                 int cpid = processline(cmd_exp, pipefd[1], NOWAIT);
                 if (cpid < 0) {
                     print_error(CMD_FORK_ERROR);
+                    close(pipefd[0]);
+                    close(pipefd[1]);
                     return 0;
                 }
                 // No writing is done on this end
@@ -106,13 +108,19 @@ int expand(char *orig, char *new, int newsize) {
                 int tmp_ptr = ptr; // Save current pointer for later
                 int chars_printed = -1;
                 while (chars_printed != 0) {
+                    if (sigint_caught) {
+                        close(pipefd[0]);
+                        return 0;
+                    }
                     chars_printed = read(pipefd[0], &new[ptr], newsize - ptr);
                     if (chars_printed < 0) {
                         perror("read");
+                        close(pipefd[0]);
                         return 0;
                     }
                     if (chars_printed > newsize - ptr) {
                         print_error(CMD_EXP_OVERFLOW);
+                        close(pipefd[0]);
                         return 0;
                     }
                     ptr += chars_printed;
