@@ -9,6 +9,8 @@
 #define WAIT 1
 #define NOWAIT 0
 
+int processline (char *line, int outfd, int flags);
+
 int expand(char *orig, char *new, int newsize);
 
 int check_for_builtin(char **argpointers, int argc);
