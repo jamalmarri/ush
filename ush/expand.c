@@ -87,7 +87,7 @@ int expand(char *orig, char *new, int newsize) {
                     }
                 }
                 // Use cmp_exp as a substring
-                orig[i] = 0;
+                orig[i - 1] = 0;
                 // Create a new pipe
                 int pipefd[2];
                 if (pipe(pipefd)) {
@@ -132,7 +132,7 @@ int expand(char *orig, char *new, int newsize) {
                 close(pipefd[0]);
                 // Wait on child if one was created
                 if (cpid > 0) {
-                    if (waitpid(cpid, NULL, 0)) {
+                    if (waitpid(cpid, NULL, 0) < 0) {
                         perror("wait");
                     }
                 }
