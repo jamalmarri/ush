@@ -23,7 +23,6 @@
 /* Prototypes */
 
 int remove_comments(char *buffer);
-int processline (char *line, int outfd, int flags);
 char ** arg_parse (char *line, int *argcptr);
 int check_for_quotes (const char *line, int *ptr);
 void strip_quotes (char *arg);
@@ -158,7 +157,9 @@ int processline (char *line, int outfd, int flags) {
             }
         }
         free(argpointers);
+        return 0;
     }
+    return -1;
 }
 
 char ** arg_parse (char *line, int *argcptr) {
