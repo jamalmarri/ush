@@ -4,6 +4,7 @@
  * Spring Quarter 2020
  */
 
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -17,11 +18,12 @@
 /* Constants */
 
 #define LINELEN 1024
+#define EXPANDLEN 200000
 
 /* Prototypes */
 
 int remove_comments(char *buffer);
-void processline (char *line);
+int processline (char *line, int outfd, int flags);
 char ** arg_parse (char *line, int *argcptr);
 int check_for_quotes (const char *line, int *ptr);
 void strip_quotes (char *arg);
@@ -55,7 +57,7 @@ int main (int argc, char **argv) {
 
     while (1) {
         if (interactive) {
-            /* prompt and get line */
+            // Prompt and get line
             fprintf (stderr, "%% ");
         }
 
@@ -64,22 +66,22 @@ int main (int argc, char **argv) {
         }
 
         if (!remove_comments(buffer)) {
-            /* Get rid of \n at end of buffer. */
+            // Get rid of \n at end of buffer
             len = strlen(buffer);
             if (buffer[len-1] == '\n') {
                 buffer[len-1] = 0;
             }
         }
 
-        /* Run it ... */
-        processline (buffer);
+        // Run it...
+        processline (buffer, 1, WAIT);
     }
 
     if (!feof(inputfile)) {
         perror ("read");
     }
 
-    return 0;       /* Also known as exit (0); */
+    return 0; // Also known as exit(0)
 }
 
 int remove_comments(char *buffer) {
@@ -92,47 +94,67 @@ int remove_comments(char *buffer) {
     return 0;
 }
 
-void processline (char *line) {
+int processline (char *line, int outfd, int flags) {
     pid_t cpid;
     int status;
-    char expanded_line[LINELEN];
+    char expanded_line[EXPANDLEN];
 
-    if (expand(line, expanded_line, LINELEN)) {
+    if (expand(line, expanded_line, EXPANDLEN)) {
         int argc; // Number of arguments for executed program
         char **argpointers = arg_parse(expanded_line, &argc);
 
         // Only attempt to execute if input contained any arguments
         if (argc > 0) {
             if (!check_for_builtin(argpointers, argc)) {
-                /* Start a new process to do the job. */
+                // Start a new process to do the job
                 cpid = fork();
                 if (cpid < 0) {
-                    /* Fork wasn't successful */
+                    // Fork wasn't successful
                     perror ("fork");
-                    return;
+                    return -1;
                 }
 
-                /* Check for who we are! */
+                // Check for who we are!
                 if (cpid == 0) {
-                    /* We are the child! */
+                    // We are the child!
+                    if (outfd != 1) {
+                        if (dup2(outfd, 1) < 0) {
+                            perror("dup2");
+                        }
+                    }
                     execvp(argpointers[0], argpointers);
-                    /* execvp returned, wasn't successful */
+                    // execvp returned, wasn't successful
                     perror ("exec");
-                    fclose(stdin);  // avoid a linux stdio bug
+                    fclose(stdin); // avoid a linux stdio bug
                     exit (127);
                 }
 
-                /* Have the parent wait for child to complete */
-                if (wait (&status) < 0) {
-                    /* Wait wasn't successful */
-                    perror ("wait");
-                } else {
-                    if (WIFEXITED(status)) {
-                        last_exit = WEXITSTATUS(status);
-                    } else if (WIFSIGNALED(status)) {
-                        last_exit = 128 + WTERMSIG(status);
+                if (flags & WAIT) {
+                    // Have the parent wait for child to complete
+                    if (wait (&status) < 0) {
+                        // Wait wasn't successful
+                        perror ("wait");
+                    } else {
+                        if (WIFEXITED(status)) {
+                            last_exit = WEXITSTATUS(status);
+                        } else if (WIFSIGNALED(status)) {
+                            if (WTERMSIG(status) != SIGINT) {
+                                fprintf(stderr, "%s", strsignal(WTERMSIG(status)));
+                                #ifdef WCOREDUMP
+                                if (WCOREDUMP(status)) {
+                                    fprintf(stderr, " (core dumped)");
+                                }
+                                #endif
+                                fprintf(stderr, "\n");
+                            }
+                            last_exit = 128 + WTERMSIG(status);
+                        }
                     }
+                } else {
+                    return cpid;
                 }
+            } else {
+                return 0;
             }
         }
         free(argpointers);

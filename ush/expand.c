@@ -10,17 +10,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "defn.h"
 
 #define NON_ENV_OVERFLOW 1
 #define PID_OVERFLOW 2
-#define MATCHING_OVERFLOW 3
+#define MATCHING_ENV_OVERFLOW 3
 #define ENV_OVERFLOW 4
-#define ARGC_OVERFLOW 5
-#define ARGN_OVERFLOW 6
-#define LAST_EXIT_OVERFLOW 7
-#define WILD_OVERFLOW 8
+#define MATCHING_CMD_OVERFLOW 5
+#define CMD_FORK_ERROR 6
+#deinne CMD_EXP_OVERFLOW 7
+#define ARGC_OVERFLOW 8
+#define ARGN_OVERFLOW 9
+#define LAST_EXIT_OVERFLOW 10
+#define WILD_OVERFLOW 11
 
 // Prototypes
 void print_error(int error_type);
@@ -47,7 +52,7 @@ int expand(char *orig, char *new, int newsize) {
                 while (orig[i] != '}') {
                     i++;
                     if (orig[i] == 0) {
-                        print_error(MATCHING_OVERFLOW);
+                        print_error(MATCHING_ENV_OVERFLOW);
                         return 0;
                     }
                 }
@@ -65,6 +70,74 @@ int expand(char *orig, char *new, int newsize) {
                 }
                 // Clean up after ourselves
                 orig[i] = '}';
+            } else if (orig[i] == '(') {
+                // Attempt command expansion
+                i++
+                char *cmd_exp = &orig[i];
+                int stack; // Integer representing the "stack" for all parentheses found
+                // Find matching parenthesis
+                for (stack = 1; stack > 0; i++) {
+                    if (orig[i] == '(') {
+                        stack++;
+                    } else if (orig[i] == ')') {
+                        stack--;
+                    } else if (orig[i] == 0) {
+                        print_error(MATCHING_CMD_OVERFLOW);
+                        return 0;
+                    }
+                }
+                // Use cmp_exp as a substring
+                orig[i] = 0;
+                // Create a new pipe
+                int pipefd[2];
+                if (pipe(pipefd)) {
+                    perror("pipe");
+                    return 0;
+                }
+                // Call processline using cmd_exp as buffer and pipe as outfd
+                int cpid = processline(cmd_exp, pipefd[1], NOWAIT);
+                if (cpid < 0) {
+                    print_error(CMD_FORK_ERROR);
+                    return 0;
+                }
+                // No writing is done on this end
+                close(pipefd[1]);
+                // Read from pipe
+                int tmp_ptr = ptr; // Save current pointer for later
+                int chars_printed = -1;
+                while (chars_printed != 0) {
+                    chars_printed = read(pipefd[0], &new[ptr], newsize - ptr);
+                    if (chars_printed < 0) {
+                        perror("read");
+                        return 0;
+                    }
+                    if (chars_printed > newsize - ptr) {
+                        print_error(CMD_EXP_OVERFLOW);
+                        return 0;
+                    }
+                    ptr += chars_printed;
+                }
+                // Remove ending newline
+                if (new[ptr - 1] == '\n') {
+                    ptr--;
+                }
+                // Replace all other newlines with spaces
+                while (tmp_ptr < ptr) {
+                    if (new[tmp_ptr] == '\n') {
+                        new[tmp_ptr] = ' ';
+                    }
+                    tmp_ptr++;
+                }
+                // Close read end of pipe
+                close(pipefd[0]);
+                // Wait on child if one was created
+                if (cpid > 0) {
+                    if (waitpid(cpid, NULL, 0)) {
+                        perror("wait");
+                    }
+                }
+                // Clean up after ourselves
+                orig[i] = ')';
             } else if (orig[i] == '#') {
                 // Apply shift offset
                 int argc = mainargc - shift_offset;
@@ -245,11 +318,20 @@ void print_error(int error_type) {
         case PID_OVERFLOW:
             fprintf(stderr, "PID expansion overflowed.\n");
             break;
-        case MATCHING_OVERFLOW:
+        case MATCHING_ENV_OVERFLOW:
             fprintf(stderr, "Reached end of line before finding matching '}'.\n");
             break;
         case ENV_OVERFLOW:
             fprintf(stderr, "Environment variable expansion overflowed.\n");
+            break;
+        case MATCHING_CMD_OVERFLOW:
+            fprintf(stderr, "Reached end of line before finding matching ')'.\n");
+            break;
+        case CMD_FORK_ERROR:
+            fprintf(stderr, "Fork during command expansion failed.\n");
+            break;
+        case CMD_EXP_OVERFLOW:
+            fprintf(stderr, "Command expansion overflowed.\n");
             break;
         case ARGC_OVERFLOW:
             fprintf(stderr, "Argument count expansion overflowed.\n");
