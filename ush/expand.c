@@ -21,7 +21,7 @@
 #define ENV_OVERFLOW 4
 #define MATCHING_CMD_OVERFLOW 5
 #define CMD_FORK_ERROR 6
-#deinne CMD_EXP_OVERFLOW 7
+#define CMD_EXP_OVERFLOW 7
 #define ARGC_OVERFLOW 8
 #define ARGN_OVERFLOW 9
 #define LAST_EXIT_OVERFLOW 10
@@ -72,7 +72,7 @@ int expand(char *orig, char *new, int newsize) {
                 orig[i] = '}';
             } else if (orig[i] == '(') {
                 // Attempt command expansion
-                i++
+                i++;
                 char *cmd_exp = &orig[i];
                 int stack; // Integer representing the "stack" for all parentheses found
                 // Find matching parenthesis
