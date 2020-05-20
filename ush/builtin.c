@@ -65,8 +65,8 @@ void exit_shell(char **argpointers, int argc) {
 }
 
 void envset(char **argpointers, int argc){
-    if (argc < 3) {
-        fprintf(stderr, "Not enough arguments for envset NAME VALUE.");
+    if (argc < 3 || argc > 3) {
+        fprintf(stderr, "Usage: envset NAME VALUE.\n");
         last_exit = 1;
     } else {
         if (setenv(argpointers[1], argpointers[2], 1)) {
@@ -79,8 +79,8 @@ void envset(char **argpointers, int argc){
 }
 
 void envunset(char **argpointers, int argc) {
-    if (argc < 2) {
-        fprintf(stderr, "Not enough arguments for envunset NAME.");
+    if (argc < 2 || argc > 2) {
+        fprintf(stderr, "Usage: envunset NAME.\n");
         last_exit = 1;
     } else {
         if (unsetenv(argpointers[1])) {
@@ -100,6 +100,9 @@ void cd(char **argpointers, int argc) {
         } else {
             last_exit = 0;
         }
+    } else if (argc > 2) {
+        fprintf(stderr, "Usage: cd [DIR]\n");
+        last_exit = 1;
     } else {
         if (chdir(argpointers[1])) {
             perror("chdir");
@@ -116,6 +119,9 @@ void shift(char **argpointers, int argc) {
     if (argc < 2) {
         // Default value
         n = 1;
+    } else if (argc > 2) {
+        fprintf(stderr, "Usage: shift [VALUE]\n");
+        last_exit = 1;
     } else {
         n = atoi(argpointers[1]);
     }
@@ -137,6 +143,9 @@ void unshift(char **argpointers, int argc) {
         // Default case
         shift_offset = 0;
         last_exit = 0;
+    } else if (argc > 2) {
+        fprintf(stderr, "Usage: unshift [VALUE]\n");
+        last_exit = 1;
     } else {
         int unshift_amount = atoi(argpointers[1]);
         // Check for valid unshift amount
@@ -155,9 +164,10 @@ void unshift(char **argpointers, int argc) {
 
 void sstat(char **argpointers, int argc) {
     if (argc < 2) {
-        fprintf(stderr, "Not enough arguments for sstat FILE [FILE...]\n");
+        fprintf(stderr, "Usage: sstat FILE [FILE...]\n");
         last_exit = 1;
     } else {
+        int exit_value = 0;
         // For every file specified
         for (int i = 1; i < argc; i++) {
             // Attempt to stat it
@@ -165,6 +175,7 @@ void sstat(char **argpointers, int argc) {
             int statreturn = stat(argpointers[i], &buf);
             if (statreturn) {
                 perror("stat");
+                last_exit = 1;
                 continue;
             }
             // Print the file name
@@ -194,6 +205,6 @@ void sstat(char **argpointers, int argc) {
             // Date contains a newline, so flush manually
             fflush(stdout);
         }
-        last_exit = 0;
+        last_exit = exit_value;
     }
 }
