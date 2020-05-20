@@ -21,6 +21,6 @@ void strmode(mode_t mode, char *p);
 /* Global Variables */
 int mainargc;
 char **mainargv;
-int shift_offset;
+int cur_shift;
 int last_exit;
 int sigint_caught;
