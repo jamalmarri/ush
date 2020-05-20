@@ -13,7 +13,7 @@
 #define NOEXPAND 0
 
 /* Global Prototypes */
-int processline(char *line, int outfd, int flags);
+int processline(char *line, int infd, int outfd, int flags);
 int expand(char *orig, char *new, int newsize);
 int check_for_builtin(char **argpointers, int argc);
 void strmode(mode_t mode, char *p);
