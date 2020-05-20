@@ -21,6 +21,9 @@
 /* Prototypes */
 int remove_comments(char *buffer);
 char ** arg_parse(char *line, int *argcptr);
+int check_for_pipelines(char *line);
+int process_pipelines(char *line, int wait);
+void kill_zombies(void);
 int check_for_quotes(const char *line, int *ptr);
 void strip_quotes(char *arg);
 void catch_signal(int signal);
@@ -38,7 +41,7 @@ int main(int argc, char **argv) {
     struct sigaction sa;
     sa.sa_handler = catch_signal;
     sa.sa_flags = SA_RESTART;
-    if (sigaction(SIGINT, &sa, NULL) < 0) {
+    if (sigaction(SIGINT, &sa, NULL)) {
         perror("sigaction");
     }
     if (argc > 1) {
@@ -95,19 +98,30 @@ int remove_comments(char *buffer) {
 int processline(char *line, int infd, int outfd, int flags) {
     int argc;
     char **argpointers;
+    char *line_to_use; // The final line to use for argument parsing
     pid_t cpid = 0;
     // Attempt to expand if flags say to do so
     if (flags & EXPAND) {
         char expanded_line[LINELEN];
-        if (expand(line, expanded_line, LINELEN)) {
-            argpointers = arg_parse(expanded_line, &argc);
-        } else {
+        if (!expand(line, expanded_line, LINELEN)) {
             return -1;
+        }
+        line_to_use = expanded_line;
+        // Check for any pipelines
+        if (check_for_pipelines(line_to_use)) {
+            if (process_pipelines(line_to_use, flags & WAIT)) {
+                return -1;
+            } else {
+                kill_zombies();
+                return 0;
+            }
         }
     } else {
         // Otherwise, just parse the original line
-        argpointers = arg_parse(line, &argc);
+        line_to_use = line;
     }
+    // Split line by arguments
+    argpointers = arg_parse(line_to_use, &argc);
     // Only proceed if any arguments were found
     if (argc > 0) {
         // No need to fork if the command is a shell builtin
@@ -126,7 +140,10 @@ int processline(char *line, int infd, int outfd, int flags) {
                         perror("dup2");
                         return -1;
                     }
-                    close(infd);
+                    if (close(infd) < 0) {
+                        perror("close");
+                        return -1;
+                    }
                 }
                 // Replace stdout with outfd and then close outfd
                 if (outfd != 1) {
@@ -134,7 +151,10 @@ int processline(char *line, int infd, int outfd, int flags) {
                         perror("dup2");
                         return -1;
                     }
-                    close(outfd);
+                    if (close(outfd) < 0) {
+                        perror("close");
+                        return -1;
+                    }
                 }
                 // Attempt to execute the command
                 execvp(argpointers[0], argpointers);
@@ -175,6 +195,86 @@ int processline(char *line, int infd, int outfd, int flags) {
     }
     free(argpointers);
     return 0;
+}
+
+int check_for_pipelines(char *line) {
+    if (strchr(line, '|') == NULL) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+int process_pipelines(char *line, int wait) {
+    // Initialize pointers for first command
+    char *pos_begin = line;
+    char *pos_end = &line[-1];
+    int pipefd[];
+    int infd = 0;
+    int outfd;
+    // Loop through commands
+    while (1) {
+        // Create new pipe
+        if (pipe(pipefd)) {
+            perror("pipe");
+            return -1;
+        }
+        outfd = pipefd[1];
+        // Find next command
+        pos_begin = pos_end[1];
+        pos_end = strchrnul(pos_begin, '|');
+        if (pos_end == NULL) {
+            // If next command is the last one, force outfd to be stdout
+            outfd = 1;
+            // Close unused pipe
+            if (close(pipefd[0]) < 0) {
+                perror("close");
+                return -1;
+            }
+            if (close(pipefd[1]) < 0) {
+                perror("close");
+                return -1;
+            }
+        } else {
+            *pos_end = 0;
+        }
+        // Process command
+        if (outfd == 1) {
+            // Use parent processline's wait flag to determine final wait flag
+            if (processline(pos_begin, infd, outfd, wait | NOEXPAND) < 0) {
+                if (close(infd) < 0) {
+                    perror("close");
+                }
+                return -1;
+            } else {
+                if (close(infd) < 0) {
+                    perror("close");
+                    return -1;
+                }
+                return 0;
+            }
+        } else if (processline(pos_begin, infd, outfd, NOWAIT | NOEXPAND) < 0) {
+            return -1;
+        }
+        // Close infd if it isn't the first iteration
+        if (infd != 0) {
+            if (close(infd) < 0) {
+                perror("close");
+                return -1;
+            }
+        }
+        // Close outfd
+        if (close(outfd) < 0) {
+            perror("close");
+            return -1;
+        }
+        // Update infd
+        infd = pipefd[0];
+    }
+}
+
+void kill_zombies(void) {
+    while (waitpid(-1, NULL, WNOHANG) > -1);
 }
 
 char ** arg_parse(char *line, int *argcptr) {
