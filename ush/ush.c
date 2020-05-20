@@ -214,29 +214,20 @@ int process_pipelines(char *line, int wait) {
     int outfd;
     // Loop through commands
     while (1) {
-        // Create new pipe
-        if (pipe(pipefd)) {
-            perror("pipe");
-            return -1;
-        }
-        outfd = pipefd[1];
         // Find next command
         pos_begin = pos_end[1];
         pos_end = strchrnul(pos_begin, '|');
         if (pos_end == NULL) {
             // If next command is the last one, force outfd to be stdout
             outfd = 1;
-            // Close unused pipe
-            if (close(pipefd[0]) < 0) {
-                perror("close");
-                return -1;
-            }
-            if (close(pipefd[1]) < 0) {
-                perror("close");
-                return -1;
-            }
         } else {
             *pos_end = 0;
+            // Create new pipe
+            if (pipe(pipefd)) {
+                perror("pipe");
+                return -1;
+            }
+            outfd = pipefd[1];
         }
         // Process command
         if (outfd == 1) {
