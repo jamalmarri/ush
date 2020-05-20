@@ -209,14 +209,14 @@ int process_pipelines(char *line, int wait) {
     // Initialize pointers for first command
     char *pos_begin = line;
     char *pos_end = &line[-1];
-    int pipefd[];
+    int pipefd[2];
     int infd = 0;
     int outfd;
     // Loop through commands
     while (1) {
         // Find next command
-        pos_begin = pos_end[1];
-        pos_end = strchrnul(pos_begin, '|');
+        pos_begin = &pos_end[1];
+        pos_end = strchr(pos_begin, '|');
         if (pos_end == NULL) {
             // If next command is the last one, force outfd to be stdout
             outfd = 1;
