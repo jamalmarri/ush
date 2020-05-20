@@ -125,7 +125,7 @@ int processline(char *line, int infd, int outfd, int flags) {
                         perror("dup2");
                         return -1;
                     }
-                    close infd;
+                    close(infd);
                 }
                 // Replace stdout with outfd and then close outfd
                 if (outfd != 1) {
@@ -133,7 +133,7 @@ int processline(char *line, int infd, int outfd, int flags) {
                         perror("dup2");
                         return -1;
                     }
-                    close outfd;
+                    close(outfd);
                 }
                 // Attempt to execute the command
                 execvp(argpointers[0], argpointers);
