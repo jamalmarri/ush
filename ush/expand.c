@@ -156,7 +156,7 @@ int expand(char *orig, char *new, int newsize) {
                 }
                 // Wait on child if one was created
                 if (cpid > 0) {
-                    if (waitpid(cpid, NULL, 0)) {
+                    if (waitpid(cpid, NULL, 0) < 0) {
                         perror("waitpid");
                     }
                 }
