@@ -16,8 +16,7 @@
 #include "defn.h"
 
 /* Constants */
-#define LINELEN 1024
-#define EXPANDLEN 200000
+#define LINELEN 200000
 
 /* Prototypes */
 int remove_comments(char *buffer);
@@ -72,7 +71,7 @@ int main(int argc, char **argv) {
             }
         }
         // Run it...
-        processline (buffer, 1, WAIT);
+        processline (buffer, 0, 1, WAIT | EXPAND);
     }
     if (!feof(inputfile)) {
         perror ("read");
@@ -92,78 +91,89 @@ int remove_comments(char *buffer) {
     return 0;
 }
 
-int processline(char *line, int outfd, int flags) {
-    pid_t cpid;
-    int status;
-    char expanded_line[EXPANDLEN];
-    // Attempt to expand line
-    if (expand(line, expanded_line, EXPANDLEN)) {
-        int argc; // Number of arguments for executed program
-        char **argpointers = arg_parse(expanded_line, &argc);
-        // Only attempt to execute if input contained any arguments
-        if (argc > 0) {
-            if (!check_for_builtin(argpointers, argc)) {
-                // Start a new process to do the job
-                cpid = fork();
-                if (cpid < 0) {
-                    // Fork wasn't successful
-                    perror ("fork");
+int processline(char *line, int infd, int outfd, int flags) {
+    int argc;
+    char **argpointers;
+    pid_t cpid = 0;
+    // Attempt to expand if flags say to do so
+    if (flags & EXPAND) {
+        char expanded_line[LINELEN];
+        if (expand(line, expanded_line, LINELEN)) {
+            argpointers = arg_parse(expanded_line, &argc);
+        } else {
+            return -1;
+        }
+    } else {
+        // Otherwise, just parse the original line
+        argpointers = arg_parse(line, &argc);
+    }
+    // Only proceed if any arguments were found
+    if (argc > 0) {
+        // No need to fork if the command is a shell builtin
+        if (!check_for_builtin(argpointers, argc)) {
+            // Attempt to fork the process
+            cpid = fork();
+            if (cpid < 0) {
+                perror("fork");
+                return -1;
+            }
+            // Check if this process is the new child process
+            if (cpid == 0) {
+                // Replace stdin with infd and then close infd
+                if (infd != 0) {
+                    if (dup2(infd, 0) < 0) {
+                        perror("dup2");
+                        return -1;
+                    }
+                    close infd;
+                }
+                // Replace stdout with outfd and then close outfd
+                if (outfd != 1) {
+                    if (dup2(outfd, 1) < 0) {
+                        perror("dup2");
+                        return -1;
+                    }
+                    close outfd;
+                }
+                // Attempt to execute the command
+                execvp(argpointers[0], argpointers);
+                // If this line is reached, there must have been an error
+                perror("exec");
+                fclose(stdin);
+                exit(127);
+            }
+            // Wait on the child process if the flags say to do so
+            if (flags & WAIT) {
+                int status;
+                if (wait(&status) < 0) {
+                    perror("wait");
                     return -1;
-                }
-                // Check for who we are!
-                if (cpid == 0) {
-                    // Change stdout to outfd
-                    if (outfd != 1) {
-                        if (dup2(outfd, 1) < 0) {
-                            perror("dup2");
-                        }
-                    }
-                    // Close outfd
-                    if (outfd != 1 && close(outfd)) {
-                        perror("close");
-                    }
-                    // Execute expanded/parsed line
-                    execvp(argpointers[0], argpointers);
-                    // Execvp returned, wasn't successful
-                    perror ("exec");
-                    // Avoid a linux stdio bug
-                    fclose(stdin);
-                    exit (127);
-                }
-                if (flags & WAIT) {
-                    // Have the parent wait for child to complete
-                    if (wait (&status) < 0) {
-                        // Wait wasn't successful
-                        perror ("wait");
-                    } else {
-                        // Update last exit global value
-                        if (WIFEXITED(status)) {
-                            last_exit = WEXITSTATUS(status);
-                        } else if (WIFSIGNALED(status)) {
-                            // Print signal description
-                            if (WTERMSIG(status) != SIGINT) {
-                                printf("%s", strsignal(WTERMSIG(status)));
-                                #ifdef WCOREDUMP
-                                if (WCOREDUMP(status)) {
-                                    printf(" (core dumped)");
-                                }
-                                #endif
-                                printf("\n");
-                            }
-                            last_exit = 128 + WTERMSIG(status);
-                        }
-                    }
                 } else {
-                    return cpid;
+                    // Update last exit global value
+                    if (WIFEXITED(status)) {
+                        last_exit = WEXITSTATUS(status);
+                    }
+                    if (WIFSIGNALED(status)) {
+                        // Print signal description
+                        if (WTERMSIG(status) != SIGINT) {
+                            printf("%s", strsignal(WTERMSIG(status)));
+                            #ifdef WCOREDUMP
+                            if (WCOREDUMP(status)) {
+                                printf(" (core dumped)");
+                            }
+                            #endif
+                            printf("\n");
+                        }
+                        last_exit = 128 + WTERMSIG(status);
+                    }
                 }
             } else {
-                return 0;
+                return cpid;
             }
         }
-        free(argpointers);
-        return 0;
     }
-    return -1;
+    free(argpointers);
+    return 0;
 }
 
 char ** arg_parse(char *line, int *argcptr) {
