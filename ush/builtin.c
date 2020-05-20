@@ -175,7 +175,7 @@ void sstat(char **argpointers, int argc) {
             int statreturn = stat(argpointers[i], &buf);
             if (statreturn) {
                 perror("stat");
-                last_exit = 1;
+                exit_value = 1;
                 continue;
             }
             // Print the file name
