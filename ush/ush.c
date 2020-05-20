@@ -29,7 +29,7 @@ void catch_signal(int signal);
 int main(int argc, char **argv) {
     FILE *inputfile;
     int interactive; // "Boolean" representing if the shell is in interactive mode
-    char buffer [LINELEN];
+    char buffer[LINELEN];
     int len;
     // Initialize global references to argc and argv
     mainargc = argc;
@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
     // Register catch_signal as the action to be taken for SIGINT
     struct sigaction sa;
     sa.sa_handler = catch_signal;
+    sa.sa_flags = SA_RESTART;
     if (sigaction(SIGINT, &sa, NULL) < 0) {
         perror("sigaction");
     }
