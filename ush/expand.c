@@ -95,7 +95,7 @@ int expand(char *orig, char *new, int newsize) {
                     return 0;
                 }
                 // Call processline using cmd_exp as buffer and pipe as outfd
-                int cpid = processline(cmd_exp, 0, pipefd[1], NOWAIT);
+                int cpid = processline(cmd_exp, 0, pipefd[1], NOWAIT | EXPAND);
                 if (cpid < 0) {
                     print_error(CMD_FORK_ERROR);
                     if (close(pipefd[0])) {
