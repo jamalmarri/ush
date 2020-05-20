@@ -161,6 +161,7 @@ int expand(char *orig, char *new, int newsize) {
                     }
                 }
                 // Clean up after ourselves
+                i--;
                 orig[i] = ')';
             } else if (orig[i] == '#') {
                 // Apply shift offset
