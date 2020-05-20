@@ -177,13 +177,13 @@ int processline(char *line, int infd, int outfd, int flags) {
           if (WIFSIGNALED(status)) {
             // Print signal description
             if (WTERMSIG(status) != SIGINT) {
-              printf("%s", strsignal(WTERMSIG(status)));
+              dprintf(outfd, "%s", strsignal(WTERMSIG(status)));
               #ifdef WCOREDUMP
               if (WCOREDUMP(status)) {
-                printf(" (core dumped)");
+                dprintf(outfd, " (core dumped)");
               }
               #endif
-              printf("\n");
+              dprintf(outfd, "\n");
             }
             last_exit = 128 + WTERMSIG(status);
           }
