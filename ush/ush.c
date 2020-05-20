@@ -22,7 +22,7 @@
 int remove_comments(char *buffer);
 char ** arg_parse(char *line, int *argcptr);
 int check_for_pipelines(char *line);
-int process_pipelines(char *line, int wait);
+int process_pipelines(char *line, int pl_outfd, int wait);
 void kill_zombies(void);
 int check_for_quotes(const char *line, int *ptr);
 void strip_quotes(char *arg);
@@ -109,7 +109,7 @@ int processline(char *line, int infd, int outfd, int flags) {
         line_to_use = expanded_line;
         // Check for any pipelines
         if (check_for_pipelines(line_to_use)) {
-            if (process_pipelines(line_to_use, flags & WAIT)) {
+            if (process_pipelines(line_to_use, outfd, flags & WAIT)) {
                 return -1;
             } else {
                 kill_zombies();
@@ -205,7 +205,7 @@ int check_for_pipelines(char *line) {
     }
 }
 
-int process_pipelines(char *line, int wait) {
+int process_pipelines(char *line, int pl_outfd, int wait) {
     // Initialize pointers for first command
     char *pos_begin = line;
     char *pos_end = &line[-1];
@@ -219,7 +219,7 @@ int process_pipelines(char *line, int wait) {
         pos_end = strchr(pos_begin, '|');
         if (pos_end == NULL) {
             // If next command is the last one, force outfd to be stdout
-            outfd = 1;
+            outfd = pl_outfd;
         } else {
             *pos_end = 0;
             // Create new pipe
@@ -230,7 +230,7 @@ int process_pipelines(char *line, int wait) {
             outfd = pipefd[1];
         }
         // Process command
-        if (outfd == 1) {
+        if (outfd == pl_outfd) {
             // Use parent processline's wait flag to determine final wait flag
             if (processline(pos_begin, infd, outfd, wait | NOEXPAND) < 0) {
                 if (close(infd) < 0) {
