@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
     mainargv = argv;
     // Register catch_signal as the action to be taken for SIGINT
     struct sigaction sa;
-    sa.sa_handler = &catch_signal;
+    sa.sa_handler = catch_signal;
     if (sigaction(SIGINT, &sa, NULL) < 0) {
         perror("sigaction");
     }
@@ -119,7 +119,7 @@ int processline(char *line, int outfd, int flags) {
                         }
                     }
                     // Close outfd
-                    if (close(outfd)) {
+                    if (outfd != 1 && close(outfd)) {
                         perror("close");
                     }
                     // Execute expanded/parsed line
