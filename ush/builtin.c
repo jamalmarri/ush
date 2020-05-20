@@ -25,7 +25,9 @@ void shift(char **argpointers, int argc);
 void unshift(char **argpointers, int argc);
 void sstat(char **argpointers, int argc);
 
+// Globals
 typedef void (*funcptr)(char **, int argc);
+int builtin_outfd;
 
 // Used for clean function redirection
 struct builtin {
@@ -42,7 +44,8 @@ static struct builtin builtins[] = {{"exit", exit_shell},
                                     {"unshift", unshift},
                                     {"sstat", sstat}};
 
-int check_for_builtin(char **argpointers, int argc) {
+int check_for_builtin(char **argpointers, int argc, int outfd) {
+    builtin_outfd = outfd;
     // Try to locate the correct builtin
     int num_builtins = (int) (sizeof(builtins) / sizeof(builtins[0]));
     for (int i = 0; i < num_builtins; i++) {
@@ -179,31 +182,29 @@ void sstat(char **argpointers, int argc) {
                 continue;
             }
             // Print the file name
-            printf("%s ", argpointers[i]);
+            dprintf(builtin_outfd, "%s ", argpointers[i]);
             // Print the username, or UID if username isn't found
             struct passwd *userinfo = getpwuid(buf.st_uid);
             if (userinfo == NULL) {
-                printf("%d ", buf.st_uid);
+                dprintf(builtin_outfd, "%d ", buf.st_uid);
             } else {
-                printf("%s ", userinfo->pw_name);
+                dprintf(builtin_outfd, "%s ", userinfo->pw_name);
             }
             // Print the groupname, or GID if groupname isn't found
             struct group *groupinfo = getgrgid(buf.st_gid);
             if (groupinfo == NULL) {
-                printf("%d ", buf.st_gid);
+                dprintf(builtin_outfd, "%d ", buf.st_gid);
             } else {
-                printf("%s ", groupinfo->gr_name);
+                dprintf(builtin_outfd, "%s ", groupinfo->gr_name);
             }
             // Print the permission bits in a nice format
             char mode[12];
             strmode(buf.st_mode, mode);
-            printf("%s", mode);
+            dprintf(builtin_outfd, "%s", mode);
             // Get date and format it
             char *date = asctime(localtime(&buf.st_mtime));
             // Print number of links, size in bytes, and formatted date
-            printf("%ld %ld %s", buf.st_nlink, buf.st_size, date);
-            // Date contains a newline, so flush manually
-            fflush(stdout);
+            dprintf(builtin_outfd, "%ld %ld %s", buf.st_nlink, buf.st_size, date);
         }
         last_exit = exit_value;
     }

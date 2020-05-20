@@ -125,7 +125,7 @@ int processline(char *line, int infd, int outfd, int flags) {
     // Only proceed if any arguments were found
     if (argc > 0) {
         // No need to fork if the command is a shell builtin
-        if (!check_for_builtin(argpointers, argc)) {
+        if (!check_for_builtin(argpointers, argc, outfd)) {
             // Attempt to fork the process
             cpid = fork();
             if (cpid < 0) {
