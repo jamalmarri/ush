@@ -15,6 +15,7 @@
 
 #include "defn.h"
 
+// Constants
 #define NON_ENV_OVERFLOW 1
 #define PID_OVERFLOW 2
 #define MATCHING_ENV_OVERFLOW 3
