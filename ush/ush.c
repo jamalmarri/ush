@@ -85,14 +85,14 @@ int main(int argc, char **argv) {
 }
 
 int remove_comments(char *buffer) {
-    for (int i = 0; buffer[i] != 0; i++) {
-        // If comment is found, remove it
-        if (buffer[i] == '#' && buffer[i - 1] != '$') {
-            buffer[i] = 0;
-            return 1;
-        }
+  for (int i = 0; buffer[i] != 0; i++) {
+    // If comment is found, remove it
+    if (buffer[i] == '#' && buffer[i - 1] != '$') {
+      buffer[i] = 0;
+      return 1;
     }
-    return 0;
+  }
+  return 0;
 }
 
 int processline(char *line, int infd, int outfd, int flags) {
@@ -370,6 +370,7 @@ void strip_quotes(char *arg) {
 
 void catch_signal(int signal) {
   sigint_caught = 1;
+  // Propagate signal to child processes
   if (waiting_on > 0) {
     kill(waiting_on, signal);
   }
