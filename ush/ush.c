@@ -15,10 +15,10 @@
 
 #include "defn.h"
 
-/* Constants */
+// Constants
 #define LINELEN 200000
 
-/* Prototypes */
+// Prototypes
 int remove_comments(char *buffer);
 char ** arg_parse(char *line, int *argcptr);
 int check_for_pipelines(char *line);
@@ -28,7 +28,7 @@ int check_for_quotes(const char *line, int *ptr);
 void strip_quotes(char *arg);
 void catch_signal(int signal);
 
-/* Shell main */
+// Shell main
 int main(int argc, char **argv) {
   FILE *inputfile;
   int interactive; // "Boolean" representing if the shell is in interactive mode
@@ -165,11 +165,13 @@ int processline(char *line, int infd, int outfd, int flags) {
       }
       // Wait on the child process if the flags say to do so
       if (flags & WAIT) {
+        waiting_on = cpid;
         int status;
         if (wait(&status) < 0) {
           perror("wait");
           return -1;
         } else {
+          waiting_on = 0;
           // Update last exit global value
           if (WIFEXITED(status)) {
             last_exit = WEXITSTATUS(status);
@@ -368,4 +370,7 @@ void strip_quotes(char *arg) {
 
 void catch_signal(int signal) {
   sigint_caught = 1;
+  if (waiting_on > 0) {
+    kill(waiting_on, signal);
+  }
 }

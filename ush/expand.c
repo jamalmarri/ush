@@ -156,13 +156,16 @@ int expand(char *orig, char *new, int newsize) {
         }
         // Wait on child if one was created
         if (cpid > 0) {
+          waiting_on = cpid;
           int status;
           if (waitpid(cpid, &status, 0) < 0) {
             perror("waitpid");
-          }
-          // Update last exit global value
-          if (WIFEXITED(status)) {
-            last_exit = WEXITSTATUS(status);
+          } else {
+            waiting_on = 0;
+            // Update last exit global value
+            if (WIFEXITED(status)) {
+              last_exit = WEXITSTATUS(status);
+            }
           }
         }
         // Clean up after ourselves
