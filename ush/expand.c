@@ -129,7 +129,7 @@ int expand(char *orig, char *new, int newsize) {
             }
             return 0;
           }
-          if (chars > newsize - ptr) {
+          if (chars >= newsize - ptr) {
             print_error(CMD_EXP_OVERFLOW);
             if (close(pipefd[0])) {
               perror("close");
