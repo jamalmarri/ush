@@ -25,11 +25,11 @@ void shift(char **argpointers, int argc);
 void unshift(char **argpointers, int argc);
 void sstat(char **argpointers, int argc);
 
-// Globals
-typedef void (*funcptr)(char **, int argc);
+// Global Variables
 int builtin_outfd;
 
 // Used for clean function redirection
+typedef void (*funcptr)(char **, int argc);
 struct builtin {
   char *name;
   funcptr function;
@@ -171,7 +171,7 @@ void sstat(char **argpointers, int argc) {
     last_exit = 1;
   } else {
     int exit_value = 0;
-    // For every file specified
+    // For every file specified...
     for (int i = 1; i < argc; i++) {
       // Attempt to stat it
       struct stat buf;
