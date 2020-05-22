@@ -61,7 +61,7 @@ echo - Testing pipe from ps aux to grep init to grep -v grep
 ps aux | grep init | grep -v grep
 echo - Testing previous pipe within a command expansion
 echo $(ps aux | grep init | grep -v grep)
-echo - Output should be the same as last command
+echo - Output should be the same as last command (except the spacing)
 echo - Testing if exit value is only affected by the last command in the pipeline
 cd doesnotexist | cat
 echo - Error should have occured. Exit value is $?. Should be 0.
