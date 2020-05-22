@@ -1,0 +1,77 @@
+Script started on 2020-05-21 21:05:38-0700
+marrij@linux-01:~/Documents/347/csci347_s20 $ ./ush/ush test
+--- Beginning ush test... ---
+
+--- Testing basic exit value reporting ---
+
+- Exiting sh with value 14
+- Shell exited with value 14
+- Exiting sh with no value
+- Shell exited with value 0
+- Testing normal case cd
+- cd returned 0
+- Testing cd with non-existant directory
+chdir: No such file or directory
+- cd returned 1
+- Testing sstat with all valid names
+stat: No such file or directory
+stat: No such file or directory
+stat: No such file or directory
+stat: No such file or directory
+stat: No such file or directory
+stat: No such file or directory
+- sstat returned 1
+- Testing sstat with a non-existant file
+stat: No such file or directory
+stat: No such file or directory
+stat: No such file or directory
+- sstat returned 1
+
+--- Testing signal reporting from children ---
+--- NOTE: using sigexit program to simulate signals
+
+- Testing signal 3
+Quit
+- Testing signal 11
+Segmentation fault
+- Testing signal 13
+Broken pipe
+- Testing signal 14
+Alarm clock
+- Testing signal 127
+
+--- Testing command expansion ---
+--- NOTE: using '\' to prevent expansion on informative echo calls
+--- the '\' does not actually appear in the executed commands
+
+- Doing echo $\(echo Hello world!)
+Hello world!
+- Doing echo $\(echo Hello) $\(echo world!)
+Hello world!
+- Doing echo $\(echo $\(echo $\(echo Hello world!)))
+Hello world!
+
+--- Testing signal catching
+--- NOTE: using sigexit program to simulate ^C
+
+- Running sigexit with -1
+- No output should have printed from sigexit
+
+--- Testing pipelines
+
+- Testing pipe from ps aux to grep init
+root         1  0.0  0.0 226792  7764 ?        Ss   Mar30   7:21 /sbin/init splash
+marrij   20170  0.0  0.0  21532  1120 pts/19   S+   21:05   0:00 grep init
+- Testing pipe from ps aux to grep init to grep -v grep
+root         1  0.0  0.0 226792  7764 ?        Ss   Mar30   7:21 /sbin/init splash
+- Testing previous pipe within a command expansion
+root 1 0.0 0.0 226792 7764 ? Ss Mar30 7:21 /sbin/init splash
+- Output should be the same as last command (except the spacing)
+- Testing if exit value is only affected by the last command in the pipeline
+chdir: No such file or directory
+- Error should have occured. Exit value is 0. Should be 0.
+
+--- Finished with tests ---
+marrij@linux-01:~/Documents/347/csci347_s20 $ exit
+
+Script done on 2020-05-21 21:05:57-0700
