@@ -1,0 +1,69 @@
+echo --- Beginning ush test... ---
+echo
+echo --- Testing basic exit value reporting ---
+echo
+echo - Exiting sh with value 14
+sh -c "exit 14"
+echo - Shell exited with value $?
+echo - Exiting sh with no value
+sh -c exit
+echo - Shell exited with value $?
+echo - Testing normal case cd
+cd .
+echo - cd returned $?
+echo - Testing cd with non-existant directory
+cd doesnotexist
+echo - cd returned $?
+echo - Testing sstat with all valid names
+sstat Makefile defn.h ush.c expand.c builtin.c strmode.c
+echo - sstat returned $?
+echo - Testing sstat with a non-existant file
+sstat Makefile defn.h doesnotexist
+echo - sstat returned $?
+echo
+echo --- Testing signal reporting from children ---
+echo --- NOTE: using sigexit program to simulate signals
+echo
+echo - Testing signal 3
+./sigexit 3
+echo - Testing signal 11
+./sigexit 11
+echo - Testing signal 13
+./sigexit 13
+echo - Testing signal 14
+./sigexit 14
+echo - Testing signal 127
+./sigexit 127
+echo
+echo --- Testing command expansion ---
+echo --- NOTE: using '\' to prevent expansion on informative echo calls
+echo --- the '\' does not actually appear in the executed commands
+echo
+echo - Doing echo $\(echo Hello world!)
+echo $(echo Hello world!)
+echo - Doing echo $\(echo Hello) $\(echo world!)
+echo $(echo Hello) $(echo world!)
+echo - Doing echo $\(echo $\(echo $\(echo Hello world!)))
+echo $(echo $(echo $(echo Hello world!)))
+echo
+echo --- Testing signal catching
+echo --- NOTE: using sigexit program to simulate ^C
+echo
+echo - Running sigexit with -1
+./sigexit -1
+echo - No output should have printed from sigexit
+echo
+echo --- Testing pipelines
+echo
+echo - Testing pipe from ps aux to grep init
+ps aux | grep init
+echo - Testing pipe from ps aux to grep init to grep -v grep
+ps aux | grep init | grep -v grep
+echo - Testing previous pipe within a command expansion
+echo $(ps aux | grep init | grep -v grep)
+echo - Output should be the same as last command
+echo - Testing if exit value is only affected by the last command in the pipeline
+cd doesnotexist | cat
+echo - Error should have occured. Exit value is $?. Should be 0.
+echo
+echo --- Finished with tests ---
