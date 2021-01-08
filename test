@@ -15,10 +15,10 @@ echo - Testing cd with non-existant directory
 cd doesnotexist
 echo - cd returned $?
 echo - Testing sstat with all valid names
-sstat Makefile defn.h ush.c expand.c builtin.c strmode.c
+sstat ush/Makefile ush/defn.h ush/ush.c ush/expand.c ush/builtin.c ush/strmode.c
 echo - sstat returned $?
 echo - Testing sstat with a non-existant file
-sstat Makefile defn.h doesnotexist
+sstat ush/Makefile ush/defn.h doesnotexist
 echo - sstat returned $?
 echo
 echo --- Testing signal reporting from children ---
